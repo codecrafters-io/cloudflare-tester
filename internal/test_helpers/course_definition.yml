@@ -62,8 +62,7 @@ stages:
 - slug: kg7
   name: Block and log
   difficulty: easy
-  marketing_md: In this stage, you'll block messages that match a policy denylist and add a log mode that reports
-    matches while forwarding requests.
+  marketing_md: In this stage, you'll implement policy rules that block or flag matching prompts.
 - slug: wt4
   name: Defeat evasion
   difficulty: medium

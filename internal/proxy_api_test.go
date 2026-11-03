@@ -73,6 +73,14 @@ func TestProxyAPIExtraResponse(t *testing.T) {
 	testProxyScenario(t, scenario, 1)
 }
 
+// Extra bytes after a successful completion are checked before SDK decoding.
+func TestProxyAPIExtraSuccessResponse(t *testing.T) {
+	// Arrange
+	scenario := "extra_success_response"
+	// Act and Assert
+	testProxyScenario(t, scenario, 1)
+}
+
 // The origin request ID must reach the client.
 func TestProxyAPIResponseHeaders(t *testing.T) {
 	// Arrange

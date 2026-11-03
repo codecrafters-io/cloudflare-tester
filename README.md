@@ -8,6 +8,7 @@ make copy_course_file
 make test
 make test_stage_1
 make test_stage_2
+make test_stage_3
 ```
 
 `TestStagesMatchYAML` checks the course and tester registrations. Stage 1 (`fi6`)
@@ -29,7 +30,7 @@ make test_flakiness RUNS=100
 ```
 
 The flakiness target repeats stage-1 lifecycle cases and stage-2 success and
-unavailable-origin cases. The full suite
+unavailable-origin cases, plus stage-3 success and origin-leak regressions. The full suite
 also checks startup timeouts and port cleanup. Python 3 and Go 1.25 are required
 for local fixture tests. No model API or paid service is used.
 
@@ -47,7 +48,19 @@ and a hung request. The `proxy_api/pass_all` reference implements both completed
 stages. Only its allocated origin address and temporary policy paths are
 normalized. No external model is contacted.
 
-Stages 3-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
+Stage 3 (`kg7`) reads a supplied `mode` and `denylist`, blocks matched prompts
+before they reach the origin, and reports the rule in a JSON HTTP 403 error.
+Log mode forwards matches unchanged and exposes `X-Firewall-Match` on the
+response. Tests count origin requests and include a short post-denial observation
+window to catch delayed forwarding. Matching is literal and case-sensitive.
+
+The `scenarios/base/block_and_log/` reference passes all three implemented stages.
+Its regressions cover leaked requests, policy parsing and message boundaries,
+incorrect errors, log-mode enforcement, missing or stale headers, and changed
+traffic. `make test_stage_3` runs all implemented stages. Raw response bytes are
+captured before SDK decoding so trailing data cannot silently pass.
+
+Stages 4-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
 still requires an external `ai-firewall` executable and does not validate those
 stages. Use `make test_stage_1` or `make test_stage_2` for the implemented references.
 

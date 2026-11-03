@@ -54,7 +54,7 @@ class Handler(BaseHTTPRequestHandler):
                 value = json.loads(data)
                 value.pop("course_marker")
                 data = json.dumps(value, separators=(",", ":")).encode()
-            if mode == "extra_response":
+            if mode == "extra_response" or (mode == "extra_success_response" and response.status == 200):
                 data += b"\nextra"
             self.send_response(response.status)
             for key in ("Content-Type", "X-Request-Id"):

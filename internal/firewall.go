@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -18,9 +19,10 @@ type firewallProcess struct {
 	done      chan struct{}
 	result    executable.ExecutableResult
 	waitError error
+	stop      func()
 }
 
-func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directoryPrefix string, timeout time.Duration) (*firewallProcess, error) {
+func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directoryPrefix string, timeout time.Duration, policy string) (*firewallProcess, error) {
 	listener, err := net.Listen("tcp", "127.0.0.1:8080")
 	if err != nil {
 		return nil, fmt.Errorf("tester setup: port 8080 is already in use; stop the other server before retrying")
@@ -36,11 +38,11 @@ func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directory
 		return nil, err
 	}
 	policyPath := filepath.Join(directory, "policy.json")
-	if err := os.WriteFile(policyPath, []byte("{}\n"), 0644); err != nil {
+	if err := os.WriteFile(policyPath, []byte(policy), 0644); err != nil {
 		os.RemoveAll(directory)
 		return nil, err
 	}
-	harness.Logger.Infof("Wrote %s: {}", policyPath)
+	harness.Logger.Infof("Wrote %s: %s", policyPath, strings.TrimSpace(policy))
 	harness.Logger.Infof("$ ./your_program.sh --origin %s --detector http://127.0.0.1:8082 --policy %q", origin, policyPath)
 	program := harness.Executable
 	program.WorkingDir = directory
@@ -55,7 +57,7 @@ func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directory
 		state.result, state.waitError = program.Wait()
 		close(state.done)
 	}()
-	harness.RegisterTeardownFunc(func() {
+	state.stop = func() {
 		defer os.RemoveAll(directory)
 		select {
 		case <-state.done:
@@ -69,7 +71,8 @@ func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directory
 			syscall.Kill(-process.Pid, syscall.SIGKILL)
 			<-state.done
 		}
-	})
+	}
+	harness.RegisterTeardownFunc(state.stop)
 	return state, nil
 }
 

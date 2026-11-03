@@ -11,7 +11,7 @@ var testerDefinition = tester_definition.TesterDefinition{
 	TestCases: []tester_definition.TestCase{
 		{Slug: "fi6", TestFunc: testBindToPort, Timeout: 20 * time.Second},
 		{Slug: "tf0", TestFunc: testProxyAPI, Timeout: 30 * time.Second},
-		{Slug: "kg7", TestFunc: testBlockAndLog},
+		{Slug: "kg7", TestFunc: testBlockAndLog, Timeout: 45 * time.Second},
 		{Slug: "wt4", TestFunc: testDefeatEvasion},
 		{Slug: "ro3", TestFunc: testScoreWithHeuristics},
 		{Slug: "xd5", TestFunc: testCallClassifier},

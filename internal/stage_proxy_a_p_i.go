@@ -90,7 +90,7 @@ func testProxyAPI(harness *test_case_harness.TestCaseHarness) error {
 	origin.Config.ReadTimeout = 3 * time.Second
 	origin.Config.WriteTimeout = 3 * time.Second
 	origin.Start()
-	process, err := startFirewall(harness, origin.URL, "cloudflare-stage-2-", 25*time.Second)
+	process, err := startFirewall(harness, origin.URL, "cloudflare-stage-2-", 25*time.Second, "{}\n")
 	if err != nil {
 		origin.Close()
 		return err
@@ -128,7 +128,8 @@ func testProxyAPI(harness *test_case_harness.TestCaseHarness) error {
 		harness.Logger.Infof("[%s] Request body: %s", testCase.name, expectedBody)
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		var response *http.Response
-		completion, callError := client.Chat.Completions.New(ctx, testCase.params, option.WithResponseInto(&response))
+		var rawBody []byte
+		completion, callError := client.Chat.Completions.New(ctx, testCase.params, option.WithResponseInto(&response), captureResponseBody(&rawBody))
 		cancel()
 		if response == nil {
 			if errors.Is(callError, context.DeadlineExceeded) {
@@ -175,7 +176,7 @@ func testProxyAPI(harness *test_case_harness.TestCaseHarness) error {
 			if callError != nil {
 				return fmt.Errorf("%s: the SDK could not read the relayed completion: %w", testCase.name, callError)
 			}
-			actualBody = completion.RawJSON()
+			actualBody = string(rawBody)
 			if len(completion.Choices) != 1 || completion.Choices[0].Message.Content != testCase.content {
 				return fmt.Errorf("%s: the SDK did not receive the scripted assistant message", testCase.name)
 			}
@@ -198,4 +199,22 @@ func testProxyAPI(harness *test_case_harness.TestCaseHarness) error {
 		harness.Logger.Successf("[%s] SDK received the origin's response unchanged", testCase.name)
 	}
 	return nil
+}
+
+// Capture wire bytes before the SDK decodes JSON, which permits trailing data.
+func captureResponseBody(destination *[]byte) option.RequestOption {
+	return option.WithMiddleware(func(request *http.Request, next option.MiddlewareNext) (*http.Response, error) {
+		response, err := next(request)
+		if err != nil {
+			return response, err
+		}
+		body, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		*destination = body
+		response.Body = io.NopCloser(bytes.NewReader(body))
+		return response, nil
+	})
 }
