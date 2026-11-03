@@ -26,11 +26,12 @@ type policyCase struct {
 	name   string
 	params openai.ChatCompletionNewParams
 	// raw is sent as the request body instead of params, for shapes the SDK never sends.
-	raw      string
-	rule     string
-	blocked  bool
-	rejected bool
-	note     string
+	raw       string
+	rule      string
+	blocked   bool
+	rejected  bool
+	note      string
+	heuristic *heuristicExpectation
 }
 
 func policyRequest(messages ...openai.ChatCompletionMessageParamUnion) openai.ChatCompletionNewParams {
@@ -112,6 +113,9 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 			harness.Logger.Infof("[%s] Origin body: %s", testCase.name, policyOriginBody)
 			harness.Logger.Infof("[%s] Expected response X-Firewall-Match: %q", testCase.name, testCase.rule)
 		}
+		if testCase.heuristic != nil {
+			harness.Logger.Infof("[%s] Expected X-Firewall-Signals IDs: %q, score >= %d: %t", testCase.name, testCase.heuristic.signals, testCase.heuristic.threshold, testCase.heuristic.above)
+		}
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		var response *http.Response
 		var rawBody []byte
@@ -141,6 +145,12 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 				hint = "return HTTP 400 without contacting the origin when you cannot inspect a request"
 			}
 			return fmt.Errorf("%s: expected %d total origin requests, got %d; %s", testCase.name, expectedRequests, len(observed), hint)
+		}
+		if testCase.heuristic != nil {
+			if err := checkHeuristicHeaders(response.Header, *testCase.heuristic); err != nil {
+				return fmt.Errorf("%s: %w", testCase.name, err)
+			}
+			harness.Logger.Successf("[%s] Expected signals fired and score is on the correct side of the threshold", testCase.name)
 		}
 		if testCase.rejected {
 			response.Body.Close()
