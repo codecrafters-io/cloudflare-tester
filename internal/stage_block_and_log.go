@@ -23,15 +23,19 @@ const logPolicy = `{"mode":"log","denylist":[{"id":"audit-export","term":"send t
 const policyOriginBody = `{"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}`
 
 type policyCase struct {
-	name   string
-	params openai.ChatCompletionNewParams
+	privateErrorValues []string
+	verified           func(bool)
+	name               string
+	params             openai.ChatCompletionNewParams
 	// raw is sent as the request body instead of params, for shapes the SDK never sends.
-	raw       string
-	rule      string
-	blocked   bool
-	rejected  bool
-	note      string
-	heuristic *heuristicExpectation
+	raw        string
+	rule       string
+	blocked    bool
+	rejected   bool
+	note       string
+	heuristic  *heuristicExpectation
+	classifier *classifierExpectation
+	dlp        *dlpExpectation
 }
 
 func policyRequest(messages ...openai.ChatCompletionMessageParamUnion) openai.ChatCompletionNewParams {
@@ -61,23 +65,33 @@ func testBlockAndLog(harness *test_case_harness.TestCaseHarness) error {
 	})
 }
 
-func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, directoryPrefix string, cases []policyCase) error {
+func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, directoryPrefix string, cases []policyCase, detectors ...*classifierFixture) error {
 	var lock sync.Mutex
 	var requests []originRequest
+	originBody := policyOriginBody
+	originStatus := http.StatusOK
 	origin := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(io.LimitReader(r.Body, 64*1024))
 		lock.Lock()
 		requests = append(requests, originRequest{r.Method, r.URL.Path, r.Host, r.Header.Get("Authorization"), r.Header.Get("Content-Type"), body, err})
+		reply, status := originBody, originStatus
 		lock.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("X-Request-Id", "req-policy")
-		io.WriteString(w, policyOriginBody)
+		w.WriteHeader(status)
+		io.WriteString(w, reply)
 	}))
 	origin.Config.ReadTimeout = 3 * time.Second
 	origin.Config.WriteTimeout = 3 * time.Second
 	origin.Start()
 	defer origin.Close()
-	process, err := startFirewall(harness, origin.URL, directoryPrefix, 20*time.Second, policy)
+	detectorURL := "http://127.0.0.1:8082"
+	var detector *classifierFixture
+	if len(detectors) > 0 {
+		detector = detectors[0]
+		detectorURL = detector.url
+	}
+	process, err := startFirewallWithDetector(harness, origin.URL, detectorURL, directoryPrefix, 20*time.Second, policy)
 	if err != nil {
 		return err
 	}
@@ -98,6 +112,17 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 				return err
 			}
 		}
+		lock.Lock()
+		originBody, originStatus = policyOriginBody, http.StatusOK
+		if testCase.dlp != nil && testCase.dlp.response != "" {
+			originBody, originStatus = testCase.dlp.response, testCase.dlp.status
+		}
+		replyBody, replyStatus := originBody, originStatus
+		lock.Unlock()
+		if testCase.dlp != nil {
+			harness.Logger.Infof("[%s] Expected origin JSON: %s", testCase.name, testCase.dlp.request)
+			harness.Logger.Infof("[%s] Scripted origin response HTTP %d: %s", testCase.name, replyStatus, replyBody)
+		}
 		if testCase.note != "" {
 			harness.Logger.Infof("[%s] %s", testCase.name, testCase.note)
 			harness.Logger.Infof("[%s] Escaped request bytes: %+q", testCase.name, expectedBody)
@@ -106,6 +131,8 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 		harness.Logger.Infof("[%s] Request body: %s", testCase.name, expectedBody)
 		if testCase.rejected {
 			harness.Logger.Infof("[%s] Expect HTTP 400 and no origin request, because the firewall cannot inspect this request", testCase.name)
+		} else if testCase.blocked && testCase.dlp != nil && testCase.dlp.outputBlocked {
+			harness.Logger.Infof("[%s] Expect HTTP 403 with error.type=firewall_block, error.rule=%s, after one redacted origin request", testCase.name, testCase.rule)
 		} else if testCase.blocked {
 			harness.Logger.Infof("[%s] Expect HTTP 403 with error.type=firewall_block, error.rule=%s, and no origin request", testCase.name, testCase.rule)
 		} else {
@@ -116,6 +143,12 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 		if testCase.heuristic != nil {
 			harness.Logger.Infof("[%s] Expected X-Firewall-Signals IDs: %q, score >= %d: %t", testCase.name, testCase.heuristic.signals, testCase.heuristic.threshold, testCase.heuristic.above)
 		}
+		if detector != nil {
+			if err := detector.prepare(harness, expectedBody, testCase); err != nil {
+				return err
+			}
+		}
+		started := time.Now()
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		var response *http.Response
 		var rawBody []byte
@@ -126,11 +159,18 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 			_, callError = client.Chat.Completions.New(ctx, testCase.params, option.WithResponseInto(&response), captureResponseBody(&rawBody))
 		}
 		cancel()
+		elapsed := time.Since(started)
 		if response == nil {
 			return fmt.Errorf("%s: no HTTP response from the firewall within the 3s request budget: %v", testCase.name, callError)
 		}
+		if detector != nil {
+			if err := detector.check(harness, testCase, response.Header, elapsed); err != nil {
+				response.Body.Close()
+				return fmt.Errorf("%s: %w", testCase.name, err)
+			}
+		}
 		// Watch briefly after a denial too, so responding before forwarding is still a leak.
-		if testCase.blocked || testCase.rejected {
+		if (testCase.blocked && (testCase.dlp == nil || !testCase.dlp.outputBlocked)) || testCase.rejected {
 			time.Sleep(200 * time.Millisecond)
 		} else {
 			expectedRequests++
@@ -145,6 +185,14 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 				hint = "return HTTP 400 without contacting the origin when you cannot inspect a request"
 			}
 			return fmt.Errorf("%s: expected %d total origin requests, got %d; %s", testCase.name, expectedRequests, len(observed), hint)
+		}
+
+		if testCase.dlp != nil && !testCase.rejected && (!testCase.blocked || testCase.dlp.outputBlocked) {
+			request := observed[len(observed)-1]
+			if err := checkDLPRequest(request, expectedBody, testCase.dlp.request, origin.Listener.Addr().String()); err != nil {
+				return fmt.Errorf("%s: %w", testCase.name, err)
+			}
+			harness.Logger.Successf("[%s] Origin received the expected redacted message content and preserved metadata", testCase.name)
 		}
 		if testCase.heuristic != nil {
 			if err := checkHeuristicHeaders(response.Header, *testCase.heuristic); err != nil {
@@ -179,18 +227,41 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 			if err != nil || json.Unmarshal(body, &envelope) != nil || contentType != "application/json" || envelope.Error.Type != "firewall_block" || envelope.Error.Rule != testCase.rule || envelope.Error.Message == "" {
 				return fmt.Errorf("%s: expected application/json with error.type=firewall_block, error.rule=%q, and a nonempty error.message; got Content-Type=%q, body=%+q", testCase.name, testCase.rule, response.Header.Get("Content-Type"), body)
 			}
-			harness.Logger.Successf("[%s] Blocked by %s without contacting the origin", testCase.name, testCase.rule)
+			if err := checkPrivateError(body, testCase.privateErrorValues); err != nil {
+				return fmt.Errorf("%s: %w", testCase.name, err)
+			}
+			if testCase.dlp != nil && testCase.dlp.outputBlocked {
+				var responseValue any
+				json.Unmarshal(rawBody, &responseValue)
+				canonical, _ := json.Marshal(responseValue)
+				if bytes.Contains(canonical, []byte(testCase.dlp.canary)) || bytes.Contains(rawBody, []byte(testCase.dlp.canary)) || response.Header.Get("X-Request-Id") != "" {
+					return fmt.Errorf("%s: outgoing denial leaked origin bytes or headers", testCase.name)
+				}
+				if testCase.rule == "canary_leak" {
+					harness.Logger.Successf("[%s] Origin contacted once, outgoing canary blocked before client bytes", testCase.name)
+				} else {
+					harness.Logger.Successf("[%s] Origin contacted once, outgoing tool response blocked before client bytes", testCase.name)
+				}
+			} else {
+				harness.Logger.Successf("[%s] Blocked by %s without contacting the origin", testCase.name, testCase.rule)
+			}
+			if testCase.verified != nil {
+				testCase.verified(response.StatusCode == 403)
+			}
 			continue
 		}
 		request := observed[len(observed)-1]
-		if request.readError != nil || request.method != http.MethodPost || request.path != "/v1/chat/completions" || request.host != origin.Listener.Addr().String() || request.authorization != "Bearer course-test-key" || request.contentType != "application/json" || !bytes.Equal(request.body, expectedBody) {
+		if request.readError != nil || request.method != http.MethodPost || request.path != "/v1/chat/completions" || request.host != origin.Listener.Addr().String() || request.authorization != "Bearer course-test-key" || request.contentType != "application/json" || testCase.dlp == nil && !bytes.Equal(request.body, expectedBody) {
 			return fmt.Errorf("%s: forward the original request body, method, path, Authorization, and Content-Type to --origin with its Host header; got %s %s Host=%q Authorization=%q Content-Type=%q body=%+q readError=%v", testCase.name, request.method, request.path, request.host, request.authorization, request.contentType, request.body, request.readError)
 		}
-		if callError != nil || response.StatusCode != http.StatusOK || string(rawBody) != policyOriginBody || response.Header.Get("Content-Type") != "application/json" || response.Header.Get("X-Request-Id") != "req-policy" {
+		if (callError != nil && replyStatus < 400) || response.StatusCode != replyStatus || string(rawBody) != replyBody || response.Header.Get("Content-Type") != "application/json" || response.Header.Get("X-Request-Id") != "req-policy" {
 			return fmt.Errorf("%s: relay the origin's HTTP 200, body, Content-Type, and X-Request-Id unchanged; got HTTP %d, SDK error=%v", testCase.name, response.StatusCode, callError)
 		}
 		if response.Header.Get("X-Firewall-Match") != testCase.rule {
 			return fmt.Errorf("%s: expected response X-Firewall-Match=%q, got %q; add it only to log-mode matches", testCase.name, testCase.rule, response.Header.Get("X-Firewall-Match"))
+		}
+		if testCase.verified != nil {
+			testCase.verified(response.StatusCode == 403)
 		}
 		harness.Logger.Successf("[%s] Forwarded unchanged with X-Firewall-Match=%q", testCase.name, testCase.rule)
 	}

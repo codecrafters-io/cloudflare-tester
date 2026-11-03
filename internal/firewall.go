@@ -23,6 +23,10 @@ type firewallProcess struct {
 }
 
 func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directoryPrefix string, timeout time.Duration, policy string) (*firewallProcess, error) {
+	return startFirewallWithDetector(harness, origin, "http://127.0.0.1:8082", directoryPrefix, timeout, policy)
+}
+
+func startFirewallWithDetector(harness *test_case_harness.TestCaseHarness, origin, detector, directoryPrefix string, timeout time.Duration, policy string) (*firewallProcess, error) {
 	listener, err := net.Listen("tcp", "127.0.0.1:8080")
 	if err != nil {
 		return nil, fmt.Errorf("tester setup: port 8080 is already in use; stop the other server before retrying")
@@ -43,11 +47,11 @@ func startFirewall(harness *test_case_harness.TestCaseHarness, origin, directory
 		return nil, err
 	}
 	harness.Logger.Infof("Wrote %s: %s", policyPath, strings.TrimSpace(policy))
-	harness.Logger.Infof("$ ./your_program.sh --origin %s --detector http://127.0.0.1:8082 --policy %q", origin, policyPath)
+	harness.Logger.Infof("$ ./your_program.sh --origin %s --detector %s --policy %q", origin, detector, policyPath)
 	program := harness.Executable
 	program.WorkingDir = directory
 	program.TimeoutInMilliseconds = int(timeout / time.Millisecond)
-	if err := program.Start("--origin", origin, "--detector", "http://127.0.0.1:8082", "--policy", policyPath); err != nil {
+	if err := program.Start("--origin", origin, "--detector", detector, "--policy", policyPath); err != nil {
 		os.RemoveAll(directory)
 		return nil, fmt.Errorf("could not start your program: %w", err)
 	}

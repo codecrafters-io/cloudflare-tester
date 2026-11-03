@@ -73,9 +73,42 @@ requests. Only allocated addresses and temporary policy paths are normalized in
 fixture comparisons, preserving the evasion evidence. `make test_stage_4` runs
 all implemented stages.
 
-Stages 5-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
-still requires an external `ai-firewall` executable and does not validate those
-stages. Use `make test_stage_1` or `make test_stage_2` for the implemented references.
+Stages 5-8 add weighted heuristics, classifier calls, per-message threshold
+decisions, and bidirectional data loss prevention. Stage 8 (`qe5`) redacts supplied
+patterns in message content with request-scoped numbered placeholders and buffers
+non-streaming responses before checking for a canary. Its reference passes all
+eight implemented stages. Run `make test_stage_8` to exercise the complete course
+so far, or `go test -count=1 ./internal/ -run 'Test(StopDataLeaks|DLP)'` for its
+focused regression and grader checks. Fixtures use local mocks and dummy values.
+
+Stage 9 (`ou9`) adds incremental SSE inspection using a character-based canary
+holdback. Clean streams retain all text, and blocked streams emit one terminal
+error without releasing marker fragments. The official SDK checks text and
+termination, with raw wire capture catching extra events after the SDK stops.
+Run `make test_stage_9` for all nine stages, or
+`go test -count=1 ./internal/ -run 'Test(InspectStreams|Stream)'` for focused
+streaming and grader checks. The latency fixture spans two seconds and requires
+first nonempty text within one second.
+
+Stage 10 (`as4`) adds trusted tool-name allowlists, parsed URL destination checks,
+and whole-batch authorization of assembled streamed calls. Approved IDs, names
+and argument strings are preserved, while a denied batch exposes no action
+fragments. Safe text still streams incrementally. Run `make test_stage_10` for
+all ten stages, or `go test -count=1 ./internal/ -run 'Test(GuardToolCalls|Tool)'`
+for focused tool and grader checks. No tool is executed by these local fixtures.
+
+Stage 11 (`mu9`) adds private-field export authorization using trusted policy
+and producing call IDs. Its synthetic finale blocks a streamed base64 record
+sent to an otherwise allowed browsing host. A 25-attack, 15-benign replay reports
+observed course-suite outcomes. Additional controls cover changed policies,
+request isolation, redaction, private diagnostics and atomic streamed denial.
+Run `make test_stage_11` for all eleven stages, or
+`go test -count=1 ./internal/ -run 'Test(StopExfiltration|Export)'` for focused
+reference, broken-implementation and deterministic grader checks.
+
+The top-level `internal/test_helpers/pass_all/` launcher requires an external
+`ai-firewall` executable. Use the per-stage Make targets for the checked-in local
+references. No live model or real tool execution is part of these fixtures.
 
 The release launcher is `test.sh`. The publish workflow runs on `v*` tags. Publish
 the first release (`v1`) before course CI attempts to download it. A tester release
