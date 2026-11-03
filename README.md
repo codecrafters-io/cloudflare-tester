@@ -9,6 +9,7 @@ make test
 make test_stage_1
 make test_stage_2
 make test_stage_3
+make test_stage_4
 ```
 
 `TestStagesMatchYAML` checks the course and tester registrations. Stage 1 (`fi6`)
@@ -30,7 +31,7 @@ make test_flakiness RUNS=100
 ```
 
 The flakiness target repeats stage-1 lifecycle cases and stage-2 success and
-unavailable-origin cases, plus stage-3 success and origin-leak regressions. The full suite
+unavailable-origin cases, plus stage-3 success and origin-leak regressions, plus stage-4 success, bounded-decoding, and preservation cases. The full suite
 also checks startup timeouts and port cleanup. Python 3 and Go 1.25 are required
 for local fixture tests. No model API or paid service is used.
 
@@ -60,7 +61,19 @@ incorrect errors, log-mode enforcement, missing or stale headers, and changed
 traffic. `make test_stage_3` runs all implemented stages. Raw response bytes are
 captured before SDK decoding so trailing data cannot silently pass.
 
-Stages 4-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
+Stage 4 (`wt4`) enables normalization when the policy includes `normalization`.
+It applies NFKC, full Unicode case folding, zero-width removal, the supplied
+homoglyph map, and one layer of whole-string base64 decoding. Inspection never
+rewrites forwarded traffic. Policies without normalization retain literal matching.
+
+The `scenarios/base/defeat_evasion/` reference passes all four implemented stages.
+Its focused regressions omit individual transforms, substitute lowercasing,
+hardcode mappings, corrupt encoded text before decoding, recurse, or rewrite
+requests. Only allocated addresses and temporary policy paths are normalized in
+fixture comparisons, preserving the evasion evidence. `make test_stage_4` runs
+all implemented stages.
+
+Stages 5-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
 still requires an external `ai-firewall` executable and does not validate those
 stages. Use `make test_stage_1` or `make test_stage_2` for the implemented references.
 

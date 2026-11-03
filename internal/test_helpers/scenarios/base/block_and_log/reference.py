@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 import time
 import threading
 from pathlib import Path
@@ -19,6 +20,46 @@ mode = os.environ.get("POLICY_SCENARIO", "pass_all")
 policy = json.loads(Path(args.policy).read_text())
 
 
+def message_texts(message):
+    """Return the strings in one message to inspect, or None if they can't be inspected."""
+    content = message.get("content")
+    if content is None:
+        if mode == "null_crash" and "content" in message:
+            raise TypeError("null content")
+        return []
+    if isinstance(content, str):
+        return [content]
+    if not isinstance(content, list):
+        return None
+    if mode == "skip_parts":
+        return []
+    texts = []
+    for part in content:
+        if not isinstance(part, dict) or part.get("type") != "text" or not isinstance(part.get("text"), str):
+            return None
+        texts.append(part["text"])
+    return texts
+
+
+def inspect(body):
+    """Return (role, text) pairs for every inspectable string, or None to fail closed."""
+    try:
+        messages = json.loads(body)["messages"]
+        if not isinstance(messages, list):
+            return None
+        pairs = []
+        for message in messages:
+            texts = message_texts(message)
+            if texts is None:
+                return None
+            pairs += [(message.get("role"), text) for text in texts]
+        return pairs
+    except (ValueError, KeyError, TypeError, AttributeError):
+        if mode == "null_crash":
+            raise
+        return None
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200 if self.path == "/health" else 404)
@@ -29,10 +70,22 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
-        messages = json.loads(body).get("messages", [])
-        contents = [message.get("content", "") for message in messages]
+        try:
+            pairs = inspect(body)
+        except TypeError:
+            # null_crash: drop the connection without a response, like a crashed handler.
+            return
+        if pairs is None and mode != "forward_uninspectable":
+            self.send_response(400)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        contents = [text for _, text in pairs or []]
         if mode == "user_only":
-            contents = [message.get("content", "") for message in messages if message.get("role") == "user"]
+            contents = [text for role, text in pairs if role == "user"]
+        if mode == "raw_match":
+            contents = re.findall(rb'"(?:content|text)":"((?:[^"\\]|\\.)*)"', body)
+            contents = [content.decode() for content in contents]
         if mode == "scan_envelope":
             contents = [body.decode()]
         if mode == "join_messages":

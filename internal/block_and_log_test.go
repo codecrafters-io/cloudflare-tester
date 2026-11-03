@@ -137,6 +137,38 @@ func TestBlockAndLogRewriteResponse(t *testing.T) {
 	testPolicyScenario(t, scenario, 1)
 }
 
+// Text inside content parts is inspected too.
+func TestBlockAndLogSkipParts(t *testing.T) {
+	// Arrange
+	scenario := "skip_parts"
+	// Act and Assert
+	testPolicyScenario(t, scenario, 1)
+}
+
+// Matching raw request bytes misses a term hidden by a JSON escape.
+func TestBlockAndLogRawMatch(t *testing.T) {
+	// Arrange
+	scenario := "raw_match"
+	// Act and Assert
+	testPolicyScenario(t, scenario, 1)
+}
+
+// A tool-call message with null content must not crash the firewall.
+func TestBlockAndLogNullCrash(t *testing.T) {
+	// Arrange
+	scenario := "null_crash"
+	// Act and Assert
+	testPolicyScenario(t, scenario, 1)
+}
+
+// A request the firewall cannot inspect must not reach the origin.
+func TestBlockAndLogForwardUninspectable(t *testing.T) {
+	// Arrange
+	scenario := "forward_uninspectable"
+	// Act and Assert
+	testPolicyScenario(t, scenario, 1)
+}
+
 func testPolicyScenario(t *testing.T, scenario string, exitCode int) {
 	t.Helper()
 	tester_utils_testing.TestTesterOutput(t, testerDefinition, map[string]tester_utils_testing.TesterOutputTestCase{
@@ -158,7 +190,10 @@ func testPolicyScenario(t *testing.T, scenario string, exitCode int) {
 var policyOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*cloudflare-stage-3-`)
 var policyPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-3-[^/\s"]+/policy\.json`)
 
+var policyCrashPeer = regexp.MustCompile(`(Exception occurred during processing of request from \('127\.0\.0\.1', )[0-9]+(\))`)
+
 func normalizePolicyOutput(output []byte) []byte {
+	output = policyCrashPeer.ReplaceAll(output, []byte(`${1}<client-port>${2}`))
 	for _, match := range policyOrigin.FindAllSubmatch(output, -1) {
 		output = bytes.ReplaceAll(output, match[1], []byte("<mock-origin>"))
 		output = bytes.ReplaceAll(output, bytes.TrimPrefix(match[1], []byte("http://")), []byte("<mock-origin-host>"))

@@ -66,8 +66,7 @@ stages:
 - slug: wt4
   name: Defeat evasion
   difficulty: medium
-  marketing_md: In this stage, you'll inspect normalized messages to catch look-alike letters, invisible characters,
-    and one layer of base64 encoding while forwarding the original text.
+  marketing_md: In this stage, you'll implement normalized message inspection to catch disguised denied terms.
 - slug: ro3
   name: Score with heuristics
   difficulty: medium

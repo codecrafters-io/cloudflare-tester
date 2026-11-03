@@ -12,7 +12,7 @@ var testerDefinition = tester_definition.TesterDefinition{
 		{Slug: "fi6", TestFunc: testBindToPort, Timeout: 20 * time.Second},
 		{Slug: "tf0", TestFunc: testProxyAPI, Timeout: 30 * time.Second},
 		{Slug: "kg7", TestFunc: testBlockAndLog, Timeout: 45 * time.Second},
-		{Slug: "wt4", TestFunc: testDefeatEvasion},
+		{Slug: "wt4", TestFunc: testDefeatEvasion, Timeout: 45 * time.Second},
 		{Slug: "ro3", TestFunc: testScoreWithHeuristics},
 		{Slug: "xd5", TestFunc: testCallClassifier},
 		{Slug: "si3", TestFunc: testDecideWithThresholds},
