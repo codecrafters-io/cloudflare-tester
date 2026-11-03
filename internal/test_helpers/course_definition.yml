@@ -58,8 +58,7 @@ stages:
 - slug: tf0
   name: Proxy the API
   difficulty: easy
-  marketing_md: In this stage, you'll forward chat completions requests and relay responses so an official OpenAI
-    SDK client works through your proxy unchanged.
+  marketing_md: In this stage, you'll implement a proxy for the chat completions API.
 - slug: kg7
   name: Block and log
   difficulty: easy

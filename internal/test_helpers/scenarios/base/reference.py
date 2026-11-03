@@ -17,7 +17,7 @@ args = parser.parse_args()
 assert args.origin == "http://127.0.0.1:8081"
 assert args.detector == "http://127.0.0.1:8082"
 assert json.loads(Path(args.policy).read_text()) == {}
-assert Path.cwd() == Path(args.policy).parent
+assert Path.cwd().resolve() == Path(args.policy).resolve().parent
 
 mode = os.environ.get("STAGE1_SCENARIO", "pass_all")
 if mode == "exit_early":

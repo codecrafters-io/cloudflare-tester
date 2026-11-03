@@ -35,8 +35,18 @@ func TestBindToPortSlowResponse(t *testing.T) {
 
 // A server already on port 8080 cannot satisfy a learner's health checks.
 func TestBindToPortOccupiedPort(t *testing.T) {
+	testStage1OccupiedPort(t, "127.0.0.1:8080")
+}
+
+// A server listening on all interfaces also counts as occupying port 8080.
+func TestBindToPortOccupiedWildcardPort(t *testing.T) {
+	testStage1OccupiedPort(t, ":8080")
+}
+
+func testStage1OccupiedPort(t *testing.T, address string) {
+	t.Helper()
 	// Arrange
-	listener, err := net.Listen("tcp", "127.0.0.1:8080")
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		t.Fatal(err)
 	}

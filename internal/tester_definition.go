@@ -10,7 +10,7 @@ var testerDefinition = tester_definition.TesterDefinition{
 	ExecutableFileName: "your_program.sh",
 	TestCases: []tester_definition.TestCase{
 		{Slug: "fi6", TestFunc: testBindToPort, Timeout: 20 * time.Second},
-		{Slug: "tf0", TestFunc: testProxyAPI},
+		{Slug: "tf0", TestFunc: testProxyAPI, Timeout: 30 * time.Second},
 		{Slug: "kg7", TestFunc: testBlockAndLog},
 		{Slug: "wt4", TestFunc: testDefeatEvasion},
 		{Slug: "ro3", TestFunc: testScoreWithHeuristics},

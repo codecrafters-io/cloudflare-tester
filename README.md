@@ -7,6 +7,7 @@ Keep this repository beside `build-your-own-cloudflare`.
 make copy_course_file
 make test
 make test_stage_1
+make test_stage_2
 ```
 
 `TestStagesMatchYAML` checks the course and tester registrations. Stage 1 (`fi6`)
@@ -27,14 +28,29 @@ make record_fixtures
 make test_flakiness RUNS=100
 ```
 
-The flakiness target repeats the success, process-exit, and occupied-port cases. The full suite
+The flakiness target repeats stage-1 lifecycle cases and stage-2 success and
+unavailable-origin cases. The full suite
 also checks startup timeouts and port cleanup. Python 3 and Go 1.25 are required
 for local fixture tests. No model API or paid service is used.
 
-Stages 2-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
+Stage 2 (`tf0`) uses the official OpenAI Go SDK against a local mock origin. Its
+four cases cover a basic completion, full conversation context and optional
+fields, an origin HTTP 400, and an unavailable origin. The tester compares body
+bytes at both ends, checks origin-host routing and authentication, and verifies
+response headers. SDK retries are disabled and each call has a three-second
+limit. The SDK is pinned to v3.74.0 for the existing Go 1.25 toolchain.
+
+Stage-2 regressions under `scenarios/base/proxy_api/` include missing proxy
+behavior, wrong origin host, dropped authentication, changed or extra bodies,
+dropped response headers, a swallowed origin error, the wrong gateway status,
+and a hung request. The `proxy_api/pass_all` reference implements both completed
+stages. Only its allocated origin address and temporary policy paths are
+normalized. No external model is contacted.
+
+Stages 3-11 remain stubs. The top-level `internal/test_helpers/pass_all/` launcher
 still requires an external `ai-firewall` executable and does not validate those
-stages. Use `make test_stage_1` for the implemented base-stage reference.
+stages. Use `make test_stage_1` or `make test_stage_2` for the implemented references.
 
 The release launcher is `test.sh`. The publish workflow runs on `v*` tags. Publish
-the first release (`v1`) before course CI attempts to download it. This stage-1
-change has not been committed or released.
+the first release (`v1`) before course CI attempts to download it. A tester release
+has not been published yet.
