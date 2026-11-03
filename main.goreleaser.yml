@@ -1,6 +1,8 @@
 builds:
   - main: ./cmd/tester/main.go
     binary: tester
+    goos: [linux]
+    goarch: [amd64, arm64]
     env:
       - CGO_ENABLED=0
 

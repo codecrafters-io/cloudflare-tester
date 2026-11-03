@@ -136,8 +136,8 @@ func runPolicyCases(harness *test_case_harness.TestCaseHarness, policy, director
 		} else if testCase.blocked {
 			harness.Logger.Infof("[%s] Expect HTTP 403 with error.type=firewall_block, error.rule=%s, and no origin request", testCase.name, testCase.rule)
 		} else {
-			harness.Logger.Infof("[%s] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy", testCase.name)
-			harness.Logger.Infof("[%s] Origin body: %s", testCase.name, policyOriginBody)
+			harness.Logger.Infof("[%s] Origin response: HTTP %d, Content-Type: application/json, X-Request-Id: req-policy", testCase.name, replyStatus)
+			harness.Logger.Infof("[%s] Origin body: %s", testCase.name, replyBody)
 			harness.Logger.Infof("[%s] Expected response X-Firewall-Match: %q", testCase.name, testCase.rule)
 		}
 		if testCase.heuristic != nil {

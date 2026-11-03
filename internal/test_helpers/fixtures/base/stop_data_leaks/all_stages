@@ -144,8 +144,8 @@
 [33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Scripted origin response HTTP 400: {"error":{"message":"Bad model"}}[0m
 [33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Request body: {"model":"course-model","messages":[{"role":"system","content":"Keep CANARY_COURSE_7F2A private."},{"role":"user","content":"Say hello to ana@example.com."}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
-[33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
-[33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Origin response: HTTP 400, Content-Type: application/json, X-Request-Id: req-policy[0m
+[33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Origin body: {"error":{"message":"Bad model"}}[0m
 [33m[tester::#QE5] [0m[94m[clean-origin-error-unchanged] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[clean-origin-error-unchanged] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[clean-origin-error-unchanged] Forwarded unchanged with X-Firewall-Match=""[0m
@@ -154,7 +154,7 @@
 [33m[tester::#QE5] [0m[94m[clean-after-leak] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#QE5] [0m[94m[clean-after-leak] Request body: {"model":"course-model","messages":[{"role":"system","content":"Keep CANARY_COURSE_7F2A private."},{"role":"user","content":"Say hello to ana@example.com."}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[clean-after-leak] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
-[33m[tester::#QE5] [0m[94m[clean-after-leak] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#QE5] [0m[94m[clean-after-leak] Origin body: {"id":"chatcmpl-dlp","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"Hello."},"finish_reason":"stop"}],"model":"course-model","created":1700000000}[0m
 [33m[tester::#QE5] [0m[94m[clean-after-leak] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[clean-after-leak] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[clean-after-leak] Forwarded unchanged with X-Firewall-Match=""[0m
@@ -163,7 +163,7 @@
 [33m[tester::#QE5] [0m[94m[case-sensitive-marker] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#QE5] [0m[94m[case-sensitive-marker] Request body: {"model":"course-model","messages":[{"role":"system","content":"Keep CANARY_COURSE_7F2A private."},{"role":"user","content":"Say hello to ana@example.com."}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[case-sensitive-marker] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
-[33m[tester::#QE5] [0m[94m[case-sensitive-marker] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#QE5] [0m[94m[case-sensitive-marker] Origin body: {"id":"chatcmpl-dlp","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"canary_course_7f2a"},"finish_reason":"stop"}],"model":"course-model","created":1700000000}[0m
 [33m[tester::#QE5] [0m[94m[case-sensitive-marker] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[case-sensitive-marker] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[case-sensitive-marker] Forwarded unchanged with X-Firewall-Match=""[0m
@@ -172,7 +172,7 @@
 [33m[tester::#QE5] [0m[94m[partial-marker] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#QE5] [0m[94m[partial-marker] Request body: {"model":"course-model","messages":[{"role":"system","content":"Keep CANARY_COURSE_7F2A private."},{"role":"user","content":"Say hello to ana@example.com."}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[partial-marker] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
-[33m[tester::#QE5] [0m[94m[partial-marker] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#QE5] [0m[94m[partial-marker] Origin body: {"id":"chatcmpl-dlp","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"CANARY_COURSE_7F2"},"finish_reason":"stop"}],"model":"course-model","created":1700000000}[0m
 [33m[tester::#QE5] [0m[94m[partial-marker] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[partial-marker] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[partial-marker] Forwarded unchanged with X-Firewall-Match=""[0m
@@ -181,7 +181,7 @@
 [33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Request body: {"model":"course-model","messages":[{"role":"system","content":"Keep CANARY_COURSE_7F2A private."},{"role":"user","content":"Say hello to ana@example.com."}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
-[33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Origin body: {"id":"chatcmpl-dlp","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"Keep the internal instruction private."},"finish_reason":"stop"}],"model":"course-model","created":1700000000}[0m
 [33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[marker-free-prompt-content-can-pass] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[marker-free-prompt-content-can-pass] Forwarded unchanged with X-Firewall-Match=""[0m
@@ -212,7 +212,7 @@
 [33m[tester::#QE5] [0m[94m[previous-canary-now-clean] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#QE5] [0m[94m[previous-canary-now-clean] Request body: {"model":"course-model","messages":[{"role":"user","content":"Hello"}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[previous-canary-now-clean] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
-[33m[tester::#QE5] [0m[94m[previous-canary-now-clean] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#QE5] [0m[94m[previous-canary-now-clean] Origin body: {"id":"chatcmpl-dlp","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"CANARY_COURSE_7F2A"},"finish_reason":"stop"}],"model":"course-model","created":1700000000}[0m
 [33m[tester::#QE5] [0m[94m[previous-canary-now-clean] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[previous-canary-now-clean] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[previous-canary-now-clean] Forwarded unchanged with X-Firewall-Match=""[0m
