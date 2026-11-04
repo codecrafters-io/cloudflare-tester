@@ -187,8 +187,8 @@ func testPolicyScenario(t *testing.T, scenario string, exitCode int) {
 	listener.Close()
 }
 
-var policyOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*cloudflare-stage-3-`)
-var policyPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-3-[^/\s"]+/policy\.json`)
+var policyOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*firewall-stage-3-`)
+var policyPath = regexp.MustCompile(`/[^\s"]*/firewall-stage-3-[^/\s"]+/policy\.json`)
 
 var policyCrashPeer = regexp.MustCompile(`(Exception occurred during processing of request from \('127\.0\.0\.1', )[0-9]+(\))`)
 
@@ -205,7 +205,7 @@ func normalizePolicyOutput(output []byte) []byte {
 // Normalization strips both allocated origins while retaining policy data and HTTP verdicts.
 func TestPolicyOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:8082 --policy \"/tmp/cloudflare-stage-3-123/policy.json\"\n--origin http://127.0.0.1:45679 --policy \"/tmp/cloudflare-stage-3-456/policy.json\"\nrule=deny-override HTTP 403 on port 8080 Host=127.0.0.1:45679\n")
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:8082 --policy \"/tmp/firewall-stage-3-123/policy.json\"\n--origin http://127.0.0.1:45679 --policy \"/tmp/firewall-stage-3-456/policy.json\"\nrule=deny-override HTTP 403 on port 8080 Host=127.0.0.1:45679\n")
 	expected := "--origin <mock-origin> --detector http://127.0.0.1:8082 --policy \"<temporary-directory>/policy.json\"\n--origin <mock-origin> --policy \"<temporary-directory>/policy.json\"\nrule=deny-override HTTP 403 on port 8080 Host=<mock-origin-host>\n"
 	// Act
 	actual := string(normalizePolicyOutput(input))

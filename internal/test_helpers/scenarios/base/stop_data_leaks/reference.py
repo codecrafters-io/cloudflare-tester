@@ -2,8 +2,6 @@ import os
 MODE = os.environ.get("MODE", "pass_all")
 import re
 import argparse
-from concurrent.futures import ThreadPoolExecutor, wait
-import time
 import base64
 import binascii
 import unicodedata
@@ -107,19 +105,14 @@ def classify_messages(body, endpoint, opener):
                 raise ValueError("Invalid classifier score")
             return score
 
-    deadline = time.monotonic() + 0.2
-    workers = ThreadPoolExecutor(max_workers=len(messages))
-    try:
-        futures = [workers.submit(classify, message) for message in messages]
-        _, pending = wait(futures, timeout=max(0, deadline - time.monotonic()))
-        if pending:
-            return None
-        return [future.result() for future in futures]
-    except (OSError, ValueError, KeyError, TypeError, http.client.HTTPException):
-        return None
-    finally:
-        # A late result must not delay or change this request's decision.
-        workers.shutdown(wait=False, cancel_futures=True)
+    scores = []
+    available = True
+    for message in messages:
+        try:
+            scores.append(classify(message))
+        except (OSError, ValueError, KeyError, TypeError, http.client.HTTPException):
+            available = False
+    return scores if available else None
 
 
 def decision_rule(messages, scores, settings, heuristics, normalization):
@@ -269,15 +262,11 @@ def main():
                     score_headers["X-Firewall-Signals"] = ",".join(signals)
                 if not matched_rule and "decisions" not in policy and score >= policy["heuristics"]["threshold"]:
                     matched_rule = "heuristic_score"
-            detector_unavailable = False
             if "classifier" in policy:
                 scores = classify_messages(body, args.detector, detector_opener)
                 if scores is None:
                     score_headers["X-Firewall-Detector-Status"] = "unavailable"
-                    detector_unavailable = policy["classifier"]["failure_mode"] == "fail_closed"
-                    if detector_unavailable:
-                        matched_rule = "detector_unavailable"
-                    elif (not matched_rule and "heuristics" in policy
+                    if (not matched_rule and "heuristics" in policy
                             and heuristic_score >= policy["heuristics"]["threshold"]):
                         matched_rule = "heuristic_score"
                 else:
@@ -290,7 +279,7 @@ def main():
                                                          policy.get("heuristics"), policy.get("normalization"))
                         elif highest >= policy["classifier"]["threshold"]:
                             matched_rule = "classifier_score"
-            if matched_rule and (policy.get("mode", "block") != "log" or detector_unavailable):
+            if matched_rule and policy.get("mode", "block") != "log":
                 data = json.dumps({"error": {
                     "message": "Blocked by firewall policy",
                     "type": "firewall_block",

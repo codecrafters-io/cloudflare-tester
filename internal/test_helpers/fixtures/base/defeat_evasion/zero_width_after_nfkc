@@ -1,6 +1,6 @@
 [33m[tester::#WT4] [0m[94mRunning tests for Stage #WT4 (wt4)[0m
-[33m[tester::#WT4] [0m[94mWrote /tmp/cloudflare-stage-4-105500360/policy.json: {"mode":"block","denylist":[{"id":"deny-override","term":"ignore previous instructions"},{"id":"deny-fold","term":"strasse"},{"id":"deny-accent","term":"caf\u00e9"}],"normalization":{"zero_width":["\u200b","\u200c","\u200d","\ufeff"],"homoglyphs":{"\u043e":"o"}}}[0m
-[33m[tester::#WT4] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:41905 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-4-105500360/policy.json"[0m
+[33m[tester::#WT4] [0m[94mWrote /tmp/firewall-stage-4-105500360/policy.json: {"mode":"block","denylist":[{"id":"deny-override","term":"ignore previous instructions"},{"id":"deny-fold","term":"strasse"},{"id":"deny-accent","term":"caf\u00e9"}],"normalization":{"zero_width":["\u200b","\u200c","\u200d","\ufeff"],"homoglyphs":{"\u043e":"o"}}}[0m
+[33m[tester::#WT4] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:41905 --detector http://127.0.0.1:8082 --policy "/tmp/firewall-stage-4-105500360/policy.json"[0m
 [33m[tester::#WT4] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#WT4] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#WT4] [0m[94mSending GET /health to port 8080 (request 2/2)[0m

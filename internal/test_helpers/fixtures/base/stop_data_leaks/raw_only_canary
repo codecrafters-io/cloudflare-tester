@@ -1,6 +1,6 @@
 [33m[tester::#QE5] [0m[94mRunning tests for Stage #QE5 (qe5)[0m
-[33m[tester::#QE5] [0m[94mWrote /tmp/cloudflare-stage-8-2428784113/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
-[33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:43249 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-8-2428784113/policy.json"[0m
+[33m[tester::#QE5] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
+[33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#QE5] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -99,8 +99,8 @@
 [33m[tester::#QE5] [0m[94m[reject-uninspectable-before-origin] Request body: {"model":"course-model","messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":"https://example.com/a.png"}}]}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[reject-uninspectable-before-origin] Expect HTTP 400 and no origin request, because the firewall cannot inspect this request[0m
 [33m[tester::#QE5] [0m[92m[reject-uninspectable-before-origin] Rejected with HTTP 400 without contacting the origin[0m
-[33m[tester::#QE5] [0m[94mWrote /tmp/cloudflare-stage-8-1885719247/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
-[33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:33633 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-8-1885719247/policy.json"[0m
+[33m[tester::#QE5] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
+[33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#QE5] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 2/2)[0m

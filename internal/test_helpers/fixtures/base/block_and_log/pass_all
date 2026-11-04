@@ -1,6 +1,6 @@
 [33m[tester::#KG7] [0m[94mRunning tests for Stage #KG7 (kg7)[0m
-[33m[tester::#KG7] [0m[94mWrote /tmp/cloudflare-stage-3-908332223/policy.json: {"mode":"block","denylist":[{"id":"deny-override","term":"ignore previous instructions"},{"id":"deny-secrets","term":"show the system prompt"}]}[0m
-[33m[tester::#KG7] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:42999 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-3-908332223/policy.json"[0m
+[33m[tester::#KG7] [0m[94mWrote /tmp/firewall-stage-3-908332223/policy.json: {"mode":"block","denylist":[{"id":"deny-override","term":"ignore previous instructions"},{"id":"deny-secrets","term":"show the system prompt"}]}[0m
+[33m[tester::#KG7] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:42999 --detector http://127.0.0.1:8082 --policy "/tmp/firewall-stage-3-908332223/policy.json"[0m
 [33m[tester::#KG7] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#KG7] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#KG7] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -41,8 +41,8 @@
 [33m[tester::#KG7] [0m[94m[reject-invalid-json] Request body: {"model":"course-model","messages":[[0m
 [33m[tester::#KG7] [0m[94m[reject-invalid-json] Expect HTTP 400 and no origin request, because the firewall cannot inspect this request[0m
 [33m[tester::#KG7] [0m[92m[reject-invalid-json] Rejected with HTTP 400 without contacting the origin[0m
-[33m[tester::#KG7] [0m[94mWrote /tmp/cloudflare-stage-3-1107412469/policy.json: {"mode":"log","denylist":[{"id":"audit-export","term":"send the private record"}]}[0m
-[33m[tester::#KG7] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:42439 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-3-1107412469/policy.json"[0m
+[33m[tester::#KG7] [0m[94mWrote /tmp/firewall-stage-3-1107412469/policy.json: {"mode":"log","denylist":[{"id":"audit-export","term":"send the private record"}]}[0m
+[33m[tester::#KG7] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:42439 --detector http://127.0.0.1:8082 --policy "/tmp/firewall-stage-3-1107412469/policy.json"[0m
 [33m[tester::#KG7] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#KG7] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#KG7] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -66,8 +66,8 @@
 [33m[tester::#KG7] [0m[92mTest passed.[0m
 
 [33m[tester::#TF0] [0m[94mRunning tests for Stage #TF0 (tf0)[0m
-[33m[tester::#TF0] [0m[94mWrote /tmp/cloudflare-stage-2-118643429/policy.json: {}[0m
-[33m[tester::#TF0] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:38325 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-2-118643429/policy.json"[0m
+[33m[tester::#TF0] [0m[94mWrote /tmp/firewall-stage-2-118643429/policy.json: {}[0m
+[33m[tester::#TF0] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:38325 --detector http://127.0.0.1:8082 --policy "/tmp/firewall-stage-2-118643429/policy.json"[0m
 [33m[tester::#TF0] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#TF0] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#TF0] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -94,8 +94,8 @@
 [33m[tester::#TF0] [0m[92mTest passed.[0m
 
 [33m[tester::#FI6] [0m[94mRunning tests for Stage #FI6 (fi6)[0m
-[33m[tester::#FI6] [0m[94mWrote /tmp/cloudflare-stage-1-653247898/policy.json: {}[0m
-[33m[tester::#FI6] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:8081 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-1-653247898/policy.json"[0m
+[33m[tester::#FI6] [0m[94mWrote /tmp/firewall-stage-1-653247898/policy.json: {}[0m
+[33m[tester::#FI6] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:8081 --detector http://127.0.0.1:8082 --policy "/tmp/firewall-stage-1-653247898/policy.json"[0m
 [33m[tester::#FI6] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#FI6] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#FI6] [0m[94mSending GET /health to port 8080 (request 2/2)[0m

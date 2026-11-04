@@ -180,7 +180,7 @@ func TestDLPRequestRejectsExtraData(t *testing.T) {
 // DLP policy construction preserves earlier decisions and uses supplied data.
 func TestDLPPolicyPreservesSettings(t *testing.T) {
 	// Arrange
-	base := decisionPolicyJSON("log", "fail_closed", decisionThresholdsJSON)
+	base := decisionPolicyJSON("log", decisionThresholdsJSON)
 	// Act
 	actual := dlpPolicyJSON(base, dlpSettingsJSON)
 	var policy map[string]json.RawMessage
@@ -202,7 +202,7 @@ func TestDLPPolicyPreservesSettings(t *testing.T) {
 // Address normalization retains the canary, placeholders, and output verdict.
 func TestDLPOutputNormalization(t *testing.T) {
 	// Arrange
-	input := `--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy "/tmp/cloudflare-stage-8-123/policy.json"
+	input := `--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy "/tmp/firewall-stage-8-123/policy.json"
 HTTP 403 canary_leak CANARY_COURSE_7F2A [REDACTED_2]
 `
 	// Act

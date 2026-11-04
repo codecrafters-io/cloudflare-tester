@@ -147,8 +147,8 @@ func testEvasionScenario(t *testing.T, scenario string, exitCode int) {
 	listener.Close()
 }
 
-var evasionOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*cloudflare-stage-4-`)
-var evasionPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-4-[^/\s"]+/policy\.json`)
+var evasionOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*firewall-stage-4-`)
+var evasionPath = regexp.MustCompile(`/[^\s"]*/firewall-stage-4-[^/\s"]+/policy\.json`)
 
 func normalizeEvasionOutput(output []byte) []byte {
 	for _, match := range evasionOrigin.FindAllSubmatch(output, -1) {
@@ -162,7 +162,7 @@ func normalizeEvasionOutput(output []byte) []byte {
 // Comparison normalization preserves evasion evidence and rule verdicts.
 func TestEvasionOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --policy \"/tmp/cloudflare-stage-4-123/policy.json\"\nHost=127.0.0.1:45678 rule=deny-fold HTTP 403 \\u200b STRASSE\n")
+	input := []byte("--origin http://127.0.0.1:45678 --policy \"/tmp/firewall-stage-4-123/policy.json\"\nHost=127.0.0.1:45678 rule=deny-fold HTTP 403 \\u200b STRASSE\n")
 	expected := "--origin <mock-origin> --policy \"<temporary-directory>/policy.json\"\nHost=<mock-origin-host> rule=deny-fold HTTP 403 \\u200b STRASSE\n"
 	// Act
 	actual := string(normalizeEvasionOutput(input))

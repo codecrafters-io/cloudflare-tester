@@ -1,6 +1,6 @@
 [33m[tester::#OU9] [0m[94mRunning tests for Stage #OU9 (ou9)[0m
-[33m[tester::#OU9] [0m[94mWrote /tmp/cloudflare-stage-9-1369695183/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"CANARY_COURSE_7F2A","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
-[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:34759 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-9-1369695183/policy.json"[0m
+[33m[tester::#OU9] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"CANARY_COURSE_7F2A","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
+[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#OU9] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -92,8 +92,8 @@
 [33m[tester::#OU9] [0m[94m[fragmented-utf8-and-crlf-events] Origin ends with data: [DONE]; fragmented=true CRLF=true[0m
 [33m[tester::#OU9] [0m[94m[fragmented-utf8-and-crlf-events] Expected blocked=false clean_text="caf\u00e9 \U0001f642 done" safe_prefix=""[0m
 [33m[tester::#OU9] [0m[92m[fragmented-utf8-and-crlf-events] SDK received text="caf\u00e9 \U0001f642 done" errors=0 done=1; origin request redacted and headers preserved[0m
-[33m[tester::#OU9] [0m[94mWrote /tmp/cloudflare-stage-9-4271408095/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"CANARY_COURSE_7F2A","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"log"}[0m
-[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:34421 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-9-4271408095/policy.json"[0m
+[33m[tester::#OU9] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"CANARY_COURSE_7F2A","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"log"}[0m
+[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#OU9] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -116,8 +116,8 @@
 [33m[tester::#OU9] [0m[94m[log-match-keeps-redaction-and-header] Origin ends with data: [DONE]; fragmented=false CRLF=false[0m
 [33m[tester::#OU9] [0m[94m[log-match-keeps-redaction-and-header] Expected blocked=false clean_text="Clean after a blocked stream." safe_prefix=""[0m
 [33m[tester::#OU9] [0m[92m[log-match-keeps-redaction-and-header] SDK received text="Clean after a blocked stream." errors=0 done=1; origin request redacted and headers preserved[0m
-[33m[tester::#OU9] [0m[94mWrote /tmp/cloudflare-stage-9-1285672244/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"X","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
-[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:35787 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-9-1285672244/policy.json"[0m
+[33m[tester::#OU9] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"X","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
+[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#OU9] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -138,8 +138,8 @@
 [33m[tester::#OU9] [0m[94m[one-character-canary-blocks] Origin ends with data: [DONE]; fragmented=false CRLF=false[0m
 [33m[tester::#OU9] [0m[94m[one-character-canary-blocks] Expected blocked=true clean_text="" safe_prefix=""[0m
 [33m[tester::#OU9] [0m[92m[one-character-canary-blocks] SDK received text="" errors=1 done=0; origin request redacted and headers preserved[0m
-[33m[tester::#OU9] [0m[94mWrote /tmp/cloudflare-stage-9-1114524182/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"A.B+","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
-[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:38471 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-9-1114524182/policy.json"[0m
+[33m[tester::#OU9] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"A.B+","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
+[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#OU9] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -159,8 +159,8 @@
 [33m[tester::#OU9] [0m[94m[literal-near-match-not-regex] Origin ends with data: [DONE]; fragmented=false CRLF=false[0m
 [33m[tester::#OU9] [0m[94m[literal-near-match-not-regex] Expected blocked=false clean_text="AxBBB" safe_prefix=""[0m
 [33m[tester::#OU9] [0m[92m[literal-near-match-not-regex] SDK received text="AxBBB" errors=0 done=1; origin request redacted and headers preserved[0m
-[33m[tester::#OU9] [0m[94mWrote /tmp/cloudflare-stage-9-1892729729/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"猫🔐","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
-[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin http://127.0.0.1:37055 --detector http://127.0.0.1:8082 --policy "/tmp/cloudflare-stage-9-1892729729/policy.json"[0m
+[33m[tester::#OU9] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[{"id":"audit-stream","term":"audit me"}],"dlp":{"canary":"猫🔐","patterns":["[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"]},"mode":"block"}[0m
+[33m[tester::#OU9] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
 [33m[tester::#OU9] [0m[92mReceived HTTP 200 for GET /health[0m
 [33m[tester::#OU9] [0m[94mSending GET /health to port 8080 (request 2/2)[0m
@@ -189,6 +189,6 @@
 [33m[tester::#OU9] [0m[94m[first-text-before-origin-finishes] Origin waits 2000ms then sends data: {"choices":[{"delta":{"content":" clean"},"finish_reason":null,"index":0}],"created":1700000000,"id":"chatcmpl-origin-stream","model":"course-model","object":"chat.completion.chunk"}[0m
 [33m[tester::#OU9] [0m[94m[first-text-before-origin-finishes] Origin ends with data: [DONE]; fragmented=false CRLF=false[0m
 [33m[tester::#OU9] [0m[94m[first-text-before-origin-finishes] Expected blocked=false clean_text="\u00e9\u00e9\u00e9 clean" safe_prefix=""[0m
-[33m[tester::#OU9] [0m[94m[first-text-before-origin-finishes] first_text_ms=2003.8 limit_ms=1000.0 origin_delay_ms=2000[0m
-[33m[tester::#OU9] [0m[91mfirst-text-before-origin-finishes: first_text_ms=2003.8 limit_ms=1000.0: release and flush safe text before the two-second origin finishes; do not buffer the whole response[0m
+[33m[tester::#OU9] [0m[94m[first-text-before-origin-finishes] first_text_ms=<measured> limit_ms=1000.0 origin_delay_ms=2000[0m
+[33m[tester::#OU9] [0m[91mfirst-text-before-origin-finishes: first_text_ms=<measured> limit_ms=1000.0: release and flush safe text before the two-second origin finishes; do not buffer the whole response[0m
 [33m[tester::#OU9] [0m[91mTest failed[0m

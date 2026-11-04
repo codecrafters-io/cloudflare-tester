@@ -90,7 +90,7 @@ func testProxyAPI(harness *test_case_harness.TestCaseHarness) error {
 	origin.Config.ReadTimeout = 3 * time.Second
 	origin.Config.WriteTimeout = 3 * time.Second
 	origin.Start()
-	process, err := startFirewall(harness, origin.URL, "cloudflare-stage-2-", 25*time.Second, "{}\n")
+	process, err := startFirewall(harness, origin.URL, "firewall-stage-2-", 25*time.Second, "{}\n")
 	if err != nil {
 		origin.Close()
 		return err

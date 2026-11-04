@@ -2,8 +2,6 @@ import argparse
 import os
 
 scenario = os.environ.get("THRESHOLD_SCENARIO", "pass_all")
-from concurrent.futures import ThreadPoolExecutor, wait
-import time
 import base64
 import binascii
 import unicodedata
@@ -92,8 +90,6 @@ def classify_messages(body, endpoint, opener):
     if not messages:
         return []
 
-    completed = []
-
     def classify(message):
         request = urllib.request.Request(
             endpoint.rstrip("/") + "/classify",
@@ -107,22 +103,18 @@ def classify_messages(body, endpoint, opener):
             score = json.loads(response.read())["score"]
             if type(score) is not int or not 0 <= score <= 100:
                 raise ValueError("Invalid classifier score")
-            completed.append((time.monotonic(), score))
             return score
 
-    deadline = time.monotonic() + 0.2
-    workers = ThreadPoolExecutor(max_workers=len(messages))
-    try:
-        futures = [workers.submit(classify, message) for message in messages]
-        _, pending = wait(futures, timeout=max(0, deadline - time.monotonic()))
-        if pending:
-            return None
-        return [score for _, score in sorted(completed)] if scenario == "arrival_order" else [future.result() for future in futures]
-    except (OSError, ValueError, KeyError, TypeError, http.client.HTTPException):
-        return None
-    finally:
-        # A late result must not delay or change this request's decision.
-        workers.shutdown(wait=False, cancel_futures=True)
+    scores = []
+    available = True
+    for message in messages:
+        try:
+            scores.append(classify(message))
+        except (OSError, ValueError, KeyError, TypeError, http.client.HTTPException):
+            available = False
+    if scenario == "arrival_order" and available:
+        return list(reversed(scores))
+    return scores if available else None
 
 
 def decision_rule(messages, scores, settings, heuristics, normalization):
@@ -211,15 +203,11 @@ def main():
                     score_headers["X-Firewall-Signals"] = ",".join(signals)
                 if not matched_rule and ("decisions" not in policy or scenario == "keep_heuristic_cutoff") and score >= policy["heuristics"]["threshold"]:
                     matched_rule = "heuristic_score"
-            detector_unavailable = False
             if "classifier" in policy:
                 scores = classify_messages(body, args.detector, detector_opener)
                 if scores is None:
                     score_headers["X-Firewall-Detector-Status"] = "unavailable"
-                    detector_unavailable = policy["classifier"]["failure_mode"] == "fail_closed"
-                    if detector_unavailable:
-                        matched_rule = "detector_unavailable"
-                    elif (not matched_rule and "heuristics" in policy
+                    if (not matched_rule and "heuristics" in policy
                             and heuristic_score >= policy["heuristics"]["threshold"] and scenario != "fallback_ignores_heuristics"):
                         matched_rule = "heuristic_score"
                 else:
@@ -234,7 +222,7 @@ def main():
                                                          policy.get("heuristics"), policy.get("normalization"))
                         elif highest >= policy["classifier"]["threshold"]:
                             matched_rule = "classifier_score"
-            if matched_rule and (policy.get("mode", "block") != "log" or detector_unavailable or scenario == "log_blocks"):
+            if matched_rule and (policy.get("mode", "block") != "log" or scenario == "log_blocks"):
                 data = json.dumps({"error": {
                     "message": "Blocked by firewall policy",
                     "type": "firewall_block",

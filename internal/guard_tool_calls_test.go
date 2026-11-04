@@ -245,7 +245,7 @@ func TestToolPolicyPreservesSettings(t *testing.T) {
 // Normalization hides stage-10 addresses while preserving authorization evidence.
 func TestToolOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/cloudflare-stage-10-123/policy.json\"\nfirst_text_ms=12.3 tool_destination_not_allowed wire_fragments=0 SDK_calls=0\n")
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/firewall-stage-10-123/policy.json\"\nfirst_text_ms=12.3 tool_destination_not_allowed wire_fragments=0 SDK_calls=0\n")
 	// Act
 	actual := string(normalizeStreamOutput(input))
 	// Assert

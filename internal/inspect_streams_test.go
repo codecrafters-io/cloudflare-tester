@@ -249,7 +249,7 @@ func TestStreamLatencyBoundary(t *testing.T) {
 // Normalization hides measured times and addresses while preserving the timing limit.
 func TestStreamOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/cloudflare-stage-9-123/policy.json\"\nfirst_text_ms=12.3 limit_ms=1000.0 origin_delay_ms=2000 errors=1 done=0 canary_leak\n")
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/firewall-stage-9-123/policy.json\"\nfirst_text_ms=12.3 limit_ms=1000.0 origin_delay_ms=2000 errors=1 done=0 canary_leak\n")
 	// Act
 	actual := normalizeStreamOutput(input)
 	// Assert

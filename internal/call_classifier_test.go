@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// A classifier-aware firewall passes stage 6.
+// A sequential classifier-aware firewall passes stage 6.
 func TestCallClassifierPassAll(t *testing.T) {
 	// Arrange
 	scenario := "pass_all"
@@ -20,14 +20,6 @@ func TestCallClassifierPassAll(t *testing.T) {
 func TestCallClassifierPreviousStage(t *testing.T) {
 	// Arrange
 	scenario := "previous_stage"
-	// Act and Assert
-	testClassifierScenario(t, scenario, 1, false)
-}
-
-// Five classifier calls must run in parallel.
-func TestCallClassifierSequential(t *testing.T) {
-	// Arrange
-	scenario := "sequential"
 	// Act and Assert
 	testClassifierScenario(t, scenario, 1, false)
 }
@@ -72,14 +64,6 @@ func TestCallClassifierAlwaysClosed(t *testing.T) {
 	testClassifierScenario(t, scenario, 1, false)
 }
 
-// Fail-closed rejects unavailable classification.
-func TestCallClassifierAlwaysOpen(t *testing.T) {
-	// Arrange
-	scenario := "always_open"
-	// Act and Assert
-	testClassifierScenario(t, scenario, 1, false)
-}
-
 // Fail-open discards partial classifier results.
 func TestCallClassifierKeepPartialScores(t *testing.T) {
 	// Arrange
@@ -92,14 +76,6 @@ func TestCallClassifierKeepPartialScores(t *testing.T) {
 func TestCallClassifierNoTimeout(t *testing.T) {
 	// Arrange
 	scenario := "no_timeout"
-	// Act and Assert
-	testClassifierScenario(t, scenario, 1, false)
-}
-
-// Executor shutdown must not wait past the classifier deadline.
-func TestCallClassifierWaitOnShutdown(t *testing.T) {
-	// Arrange
-	scenario := "wait_on_shutdown"
 	// Act and Assert
 	testClassifierScenario(t, scenario, 1, false)
 }
@@ -144,10 +120,9 @@ func testClassifierScenario(t *testing.T, scenario string, exitCode int, allStag
 	listener.Close()
 }
 
-var classifierEndpoints = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+) --detector (http://127\.0\.0\.1:[0-9]+)[^\n]*cloudflare-stage-(?:[6789]|10|11)-`)
-var classifierPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-(?:[6789]|10|11)-[^/\s"]+/policy\.json`)
-var classifierMeasurement = regexp.MustCompile(`(batch_ms|single_ms|elapsed_ms)=[0-9]+\.[0-9]+`)
-var classifierParallelLimit = regexp.MustCompile(`(batch_ms=<measured> single_ms=<measured> limit_ms=)[0-9]+\.[0-9]+`)
+var classifierEndpoints = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+) --detector (http://127\.0\.0\.1:[0-9]+)[^\n]*firewall-stage-(?:[6789]|10|11)-`)
+var classifierPath = regexp.MustCompile(`/[^\s"]*/firewall-stage-(?:[6789]|10|11)-[^/\s"]+/policy\.json`)
+var classifierMeasurement = regexp.MustCompile(`(elapsed_ms)=[0-9]+\.[0-9]+`)
 
 func normalizeClassifierOutput(output []byte) []byte {
 	for _, match := range classifierEndpoints.FindAllSubmatch(output, -1) {
@@ -158,15 +133,14 @@ func normalizeClassifierOutput(output []byte) []byte {
 	}
 	output = classifierPath.ReplaceAll(output, []byte("<temporary-directory>/policy.json"))
 	output = classifierMeasurement.ReplaceAll(output, []byte("${1}=<measured>"))
-	output = classifierParallelLimit.ReplaceAll(output, []byte("${1}<measured>"))
 	return normalizeHeuristicOutput(output)
 }
 
-// Comparison normalization retains fixed deadline and failure evidence.
+// Comparison normalization retains the fixed timeout and fallback evidence.
 func TestClassifierOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/cloudflare-stage-6-123/policy.json\"\nbatch_ms=122.3 single_ms=123.1 limit_ms=246.2\nelapsed_ms=200.3 limit_ms=600.0 timeout 200ms HTTP 403 detector_unavailable\n")
-	expected := "--origin <mock-origin> --detector <mock-detector> --policy \"<temporary-directory>/policy.json\"\nbatch_ms=<measured> single_ms=<measured> limit_ms=<measured>\nelapsed_ms=<measured> limit_ms=600.0 timeout 200ms HTTP 403 detector_unavailable\n"
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/firewall-stage-6-123/policy.json\"\nelapsed_ms=200.3 limit_ms=600.0 per-call timeout 200ms fallback\n")
+	expected := "--origin <mock-origin> --detector <mock-detector> --policy \"<temporary-directory>/policy.json\"\nelapsed_ms=<measured> limit_ms=600.0 per-call timeout 200ms fallback\n"
 	// Act
 	actual := string(normalizeClassifierOutput(input))
 	// Assert

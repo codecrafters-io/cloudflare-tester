@@ -16,7 +16,7 @@ const exportToolsJSON = `{"http_get":{"url_argument":"url","allowed_hosts":["all
 
 func exportPolicyJSON(mode, settings string) string {
 	var policy map[string]json.RawMessage
-	json.Unmarshal([]byte(decisionPolicyJSON(mode, "fail_open", decisionThresholdsJSON)), &policy)
+	json.Unmarshal([]byte(decisionPolicyJSON(mode, decisionThresholdsJSON)), &policy)
 	policy["tools"] = json.RawMessage(exportToolsJSON)
 	policy["exports"] = json.RawMessage(settings)
 	// This fixture deliberately leaves private records visible to the model.
@@ -186,7 +186,7 @@ func testStopExfiltration(h *test_case_harness.TestCaseHarness) error {
 		attack := cases[index].blocked
 		cases[index].verified = func(blocked bool) { scoreboard.observe(attack, blocked) }
 	}
-	if err := runPolicyCases(h, exportPolicyJSON("block", exportSettingsJSON), "cloudflare-stage-11-", cases, detector); err != nil {
+	if err := runPolicyCases(h, exportPolicyJSON("block", exportSettingsJSON), "firewall-stage-11-", cases, detector); err != nil {
 		return err
 	}
 	stream := func(name, tool, arguments, rule string) streamCase {
@@ -209,7 +209,7 @@ func testStopExfiltration(h *test_case_harness.TestCaseHarness) error {
 	// Additional policy controls do not count toward the fixed course scoreboard.
 	changed := `{"private_tools":["read_private_ticket"],"allowed":[{"tool":"send_email","destination_argument":"recipient","email_domain":"support.example.org"}]}`
 	alternate := exportHistory("read_private_ticket", `{"ticket":"Ticket-9034"}`, "Public-directory-entry")
-	if err := runPolicyCases(h, exportPolicyJSON("log", changed), "cloudflare-stage-11-", []policyCase{
+	if err := runPolicyCases(h, exportPolicyJSON("log", changed), "firewall-stage-11-", []policyCase{
 		one("changed-private-tool-and-domain", alternate, "send_email", arg(map[string]string{"recipient": "team@support.example.org", "body": "Ticket-9034"}), ""),
 		one("log-mode-still-stops-private-export", alternate, "http_get", requestURL("Ticket-9034"), "private_export"),
 		one("old-destination-field-is-not-authority", alternate, "send_email", email("team@support.example.org", "Ticket-9034"), "private_export"),
@@ -218,7 +218,7 @@ func testStopExfiltration(h *test_case_harness.TestCaseHarness) error {
 		return err
 	}
 	empty := `{"private_tools":["read_customer_record"],"allowed":[]}`
-	if err := runPolicyCases(h, exportPolicyJSON("block", empty), "cloudflare-stage-11-", []policyCase{one("empty-exports-denies-even-crm", history, "send_email", email("ops@crm.example.com", "Customer-4829"), "private_export")}, detector); err != nil {
+	if err := runPolicyCases(h, exportPolicyJSON("block", empty), "firewall-stage-11-", []policyCase{one("empty-exports-denies-even-crm", history, "send_email", email("ops@crm.example.com", "Customer-4829"), "private_export")}, detector); err != nil {
 		return err
 	}
 	edgeCases := []policyCase{
@@ -228,7 +228,7 @@ func testStopExfiltration(h *test_case_harness.TestCaseHarness) error {
 		one("reject-whitespace-recipient", history, "send_email", email(" ops@crm.example.com", "Customer-4829"), "private_export"),
 		one("reject-null-recipient", history, "send_email", `{"to":null,"body":"Customer-4829"}`, "private_export"),
 	}
-	if err := runPolicyCases(h, exportPolicyJSON("block", exportSettingsJSON), "cloudflare-stage-11-", edgeCases, detector); err != nil {
+	if err := runPolicyCases(h, exportPolicyJSON("block", exportSettingsJSON), "firewall-stage-11-", edgeCases, detector); err != nil {
 		return err
 	}
 	// Tracking uses original history even when redaction changes the private result.
@@ -237,11 +237,11 @@ func testStopExfiltration(h *test_case_harness.TestCaseHarness) error {
 	redacting["dlp"] = map[string]any{"patterns": []string{`mira[.]chen@example[.]net`}, "canary": dlpCanary}
 	redacted := one("track-private-values-before-redaction", history, "http_get", requestURL("mira.chen@example.net"), "private_export")
 	redacted.dlp.request = strings.ReplaceAll(history, "mira.chen@example.net", "[REDACTED_1]")
-	if err := runPolicyCases(h, arg(redacting), "cloudflare-stage-11-", []policyCase{redacted}, detector); err != nil {
+	if err := runPolicyCases(h, arg(redacting), "firewall-stage-11-", []policyCase{redacted}, detector); err != nil {
 		return err
 	}
 	emptyPrivate := `{"private_tools":[],"allowed":[]}`
-	if err := runPolicyCases(h, exportPolicyJSON("block", emptyPrivate), "cloudflare-stage-11-", []policyCase{one("empty-private-tool-list", history, "http_get", requestURL("Customer-4829"), "")}, detector); err != nil {
+	if err := runPolicyCases(h, exportPolicyJSON("block", emptyPrivate), "firewall-stage-11-", []policyCase{one("empty-private-tool-list", history, "http_get", requestURL("Customer-4829"), "")}, detector); err != nil {
 		return err
 	}
 	// Export checks also operate without redaction or configured normalization.
@@ -249,7 +249,7 @@ func testStopExfiltration(h *test_case_harness.TestCaseHarness) error {
 	json.Unmarshal([]byte(exportPolicyJSON("block", exportSettingsJSON)), &minimal)
 	delete(minimal, "normalization")
 	delete(minimal, "dlp")
-	if err := runPolicyCases(h, arg(minimal), "cloudflare-stage-11-", []policyCase{deny("decode-without-normalization-policy", requestURL(b64("Customer-4829")))}, detector); err != nil {
+	if err := runPolicyCases(h, arg(minimal), "firewall-stage-11-", []policyCase{deny("decode-without-normalization-policy", requestURL(b64("Customer-4829")))}, detector); err != nil {
 		return err
 	}
 	batchArguments := requestURL("Customer-4829")

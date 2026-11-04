@@ -67,11 +67,11 @@ func testGuardToolCalls(h *test_case_harness.TestCaseHarness) error {
 	}
 	// Request tool definitions do not authorize an action absent from trusted policy.
 	cases[0].params.SetExtraFields(map[string]any{"tools": []any{map[string]any{"type": "function", "function": map[string]any{"name": "run_shell", "description": "Return a dummy result", "parameters": map[string]any{"type": "object"}}}}})
-	if err := runPolicyCases(h, toolPolicyJSON("block", toolsJSON), "cloudflare-stage-10-", cases); err != nil {
+	if err := runPolicyCases(h, toolPolicyJSON("block", toolsJSON), "firewall-stage-10-", cases); err != nil {
 		return err
 	}
 	changed := `{"fetch_page":{"url_argument":"target","allowed_hosts":["docs.example.org"]},"run_shell":{}}`
-	if err := runPolicyCases(h, toolPolicyJSON("log", changed), "cloudflare-stage-10-", []policyCase{
+	if err := runPolicyCases(h, toolPolicyJSON("log", changed), "firewall-stage-10-", []policyCase{
 		one("use-supplied-tool-and-url-field", "fetch_page", `{"target":"https://DOCS.EXAMPLE.ORG/","url":"https://evil.io"}`, ""),
 		one("previous-allowlist-is-not-authority", "http_get", `{"url":"https://allowed.com/"}`, "tool_not_allowed"),
 		one("configured-run-shell-is-allowed", "run_shell", `{"command":"echo course"}`, ""),
@@ -79,7 +79,7 @@ func testGuardToolCalls(h *test_case_harness.TestCaseHarness) error {
 	}); err != nil {
 		return err
 	}
-	if err := runPolicyCases(h, toolPolicyJSON("block", `{}`), "cloudflare-stage-10-", []policyCase{one("empty-tool-allowlist-denies-all", "get_weather", `{}`, "tool_not_allowed")}); err != nil {
+	if err := runPolicyCases(h, toolPolicyJSON("block", `{}`), "firewall-stage-10-", []policyCase{one("empty-tool-allowlist-denies-all", "get_weather", `{}`, "tool_not_allowed")}); err != nil {
 		return err
 	}
 	return runToolStreamCases(h)

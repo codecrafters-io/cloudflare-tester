@@ -139,8 +139,8 @@ func testHeuristicScenario(t *testing.T, scenario string, exitCode int) {
 	listener.Close()
 }
 
-var heuristicOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*cloudflare-stage-5-`)
-var heuristicPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-5-[^/\s"]+/policy\.json`)
+var heuristicOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*firewall-stage-5-`)
+var heuristicPath = regexp.MustCompile(`/[^\s"]*/firewall-stage-5-[^/\s"]+/policy\.json`)
 
 func normalizeHeuristicOutput(output []byte) []byte {
 	for _, match := range heuristicOrigin.FindAllSubmatch(output, -1) {
@@ -154,7 +154,7 @@ func normalizeHeuristicOutput(output []byte) []byte {
 // Output normalization retains signal and score diagnostics.
 func TestHeuristicOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --policy \"/tmp/cloudflare-stage-5-123/policy.json\"\nHost=127.0.0.1:45678 score >= 5: true signals=[role-token]\n")
+	input := []byte("--origin http://127.0.0.1:45678 --policy \"/tmp/firewall-stage-5-123/policy.json\"\nHost=127.0.0.1:45678 score >= 5: true signals=[role-token]\n")
 	expected := "--origin <mock-origin> --policy \"<temporary-directory>/policy.json\"\nHost=<mock-origin-host> score >= 5: true signals=[role-token]\n"
 	// Act
 	actual := string(normalizeHeuristicOutput(input))

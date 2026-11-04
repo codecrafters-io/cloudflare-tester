@@ -131,10 +131,10 @@ func runConfiguredStreamCases(h *test_case_harness.TestCaseHarness, mode, canary
 	}))
 	defer origin.Close()
 	detectorURL := "http://127.0.0.1:8082"
-	prefix := "cloudflare-stage-9-"
+	prefix := "firewall-stage-9-"
 	if detector != nil {
 		detectorURL = detector.url
-		prefix = "cloudflare-stage-11-"
+		prefix = "firewall-stage-11-"
 	}
 	process, err := startFirewallWithDetector(h, origin.URL, detectorURL, prefix, 30*time.Second, policy)
 	if err != nil {

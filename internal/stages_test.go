@@ -151,7 +151,7 @@ func testStage1Scenario(t *testing.T, scenario string, exitCode int) {
 	listener.Close()
 }
 
-var stage1PolicyPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-1-[^/\s"]+/policy\.json`)
+var stage1PolicyPath = regexp.MustCompile(`/[^\s"]*/firewall-stage-1-[^/\s"]+/policy\.json`)
 
 func normalizeStage1Output(output []byte) []byte {
 	return stage1PolicyPath.ReplaceAll(output, []byte("<temporary-directory>/policy.json"))

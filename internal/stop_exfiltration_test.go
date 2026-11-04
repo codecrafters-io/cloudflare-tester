@@ -253,7 +253,7 @@ func TestExportFixturePolicy(t *testing.T) {
 // Output normalization removes only allocated addresses and timing measurements.
 func TestExportOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/cloudflare-stage-11-123/policy.json\"\nfirst_text_ms=12.3 private_export call_3 classifier 12\n")
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/firewall-stage-11-123/policy.json\"\nfirst_text_ms=12.3 private_export call_3 classifier 12\n")
 	// Act
 	actual := string(normalizeStreamOutput(input))
 	// Assert

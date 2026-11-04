@@ -1,4 +1,4 @@
-module github.com/codecrafters-io/cloudflare-tester
+module github.com/codecrafters-io/firewall-tester
 
 go 1.25.0
 

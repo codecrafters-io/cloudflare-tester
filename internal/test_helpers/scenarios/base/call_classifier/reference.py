@@ -2,8 +2,6 @@ import argparse
 import os
 
 scenario = os.environ.get("CLASSIFIER_SCENARIO", "pass_all")
-from concurrent.futures import ThreadPoolExecutor, wait
-import time
 import base64
 import binascii
 import unicodedata
@@ -109,7 +107,7 @@ def classify_messages(body, endpoint, opener):
             headers={"Content-Type": "application/json", **({"Authorization": "Bearer course-test-key"} if scenario == "leak_authorization" else {})},
             method="POST",
         )
-        with opener.open(request, timeout=2 if scenario in ("no_timeout", "wait_on_shutdown") else 0.2) as response:
+        with opener.open(request, timeout=2 if scenario == "no_timeout" else 0.2) as response:
             if response.status != 200:
                 raise ValueError("Classifier did not return HTTP 200")
             score = json.loads(response.read())["score"]
@@ -117,24 +115,16 @@ def classify_messages(body, endpoint, opener):
                 raise ValueError("Invalid classifier score")
             return score
 
-    if scenario == "sequential":
-        return [classify(message) for message in messages]
-    deadline = time.monotonic() + 0.2
-    workers = ThreadPoolExecutor(max_workers=len(messages))
-    try:
-        futures = [workers.submit(classify, message) for message in messages]
-        _, pending = wait(futures, timeout=None if scenario == "no_timeout" else max(0, deadline - time.monotonic()))
-        if pending:
-            return None
-        return [future.result() for future in futures]
-    except (OSError, ValueError, KeyError, TypeError, http.client.HTTPException):
-        if scenario == "keep_partial_scores":
-            good = [future.result() for future in futures if future.done() and future.exception() is None]
-            return good or None
-        return None
-    finally:
-        # A late result must not delay or change this request's decision.
-        workers.shutdown(wait=scenario == "wait_on_shutdown", cancel_futures=True)
+    scores = []
+    available = True
+    for message in messages:
+        try:
+            scores.append(classify(message))
+        except (OSError, ValueError, KeyError, TypeError, http.client.HTTPException):
+            available = False
+    if scenario == "keep_partial_scores" and not available:
+        return scores or None
+    return scores if available else None
 
 
 def main():
@@ -191,7 +181,7 @@ def main():
                 scores = classify_messages(body, args.detector, detector_opener)
                 if scores is None:
                     score_headers["X-Firewall-Detector-Status"] = "unavailable"
-                    detector_unavailable = scenario == "always_closed" or (policy["classifier"]["failure_mode"] == "fail_closed" and scenario != "always_open")
+                    detector_unavailable = scenario == "always_closed"
                     if detector_unavailable:
                         matched_rule = "detector_unavailable"
                 else:

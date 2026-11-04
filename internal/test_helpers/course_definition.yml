@@ -1,7 +1,7 @@
 # Unallocated slugs, in order, for later extension stages:
 # nj7 vc1 vd2 cq5 mh9 kk3 ys3 ly4 mp4
 
-slug: cloudflare
+slug: firewall
 name: Build your own AI Firewall
 short_name: AI Firewall
 release_status: alpha
@@ -75,8 +75,7 @@ stages:
 - slug: xd5
   name: Call the classifier
   difficulty: medium
-  marketing_md: In this stage, you'll score messages through a classifier service in parallel, enforce a timeout,
-    and apply the policy when the service fails.
+  marketing_md: In this stage, you'll score messages through a classifier service and apply a policy cutoff.
 - slug: si3
   name: Decide with thresholds
   difficulty: medium

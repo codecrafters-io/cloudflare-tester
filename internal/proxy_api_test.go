@@ -123,8 +123,8 @@ func testProxyScenario(t *testing.T, scenario string, exitCode int) {
 	listener.Close()
 }
 
-var proxyOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*cloudflare-stage-2-`)
-var proxyPolicyPath = regexp.MustCompile(`/[^\s"]*/cloudflare-stage-2-[^/\s"]+/policy\.json`)
+var proxyOrigin = regexp.MustCompile(`--origin (http://127\.0\.0\.1:[0-9]+)[^\n]*firewall-stage-2-`)
+var proxyPolicyPath = regexp.MustCompile(`/[^\s"]*/firewall-stage-2-[^/\s"]+/policy\.json`)
 
 func normalizeProxyOutput(output []byte) []byte {
 	if match := proxyOrigin.FindSubmatch(output); len(match) > 1 {
@@ -137,7 +137,7 @@ func normalizeProxyOutput(output []byte) []byte {
 // Normalization removes allocated addresses while preserving protocol constants and verdicts.
 func TestProxyOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:8082 --policy \"/tmp/cloudflare-stage-2-123/policy.json\"\nSDK http://127.0.0.1:8080/v1 returned HTTP 502\n")
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:8082 --policy \"/tmp/firewall-stage-2-123/policy.json\"\nSDK http://127.0.0.1:8080/v1 returned HTTP 502\n")
 	expected := "--origin <mock-origin> --detector http://127.0.0.1:8082 --policy \"<temporary-directory>/policy.json\"\nSDK http://127.0.0.1:8080/v1 returned HTTP 502\n"
 	// Act
 	actual := string(normalizeProxyOutput(input))

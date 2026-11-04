@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Parallel request comparison preserves duplicate message multiplicity and original JSON values.
+// Request comparison preserves duplicate message multiplicity and original JSON values.
 func TestClassifierRequestsAcceptUnorderedMessages(t *testing.T) {
 	// Arrange
 	first := json.RawMessage(`{"role":"user","content":[{"type":"text","text":"KEEP caf\u00e9"}]}`)
@@ -106,48 +106,12 @@ func TestClassifierHeadersRejectInvalidCategories(t *testing.T) {
 	}
 }
 
-// The concurrency budget accepts a batch that finishes in less than twice one call.
-func TestClassifierParallelTimingAcceptsParallelCalls(t *testing.T) {
-	// Arrange
-	batch, single := 130*time.Millisecond, 120*time.Millisecond
-	// Act
-	err := checkClassifierParallelTiming(batch, single)
-	// Assert
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-// A batch at the two-call limit fails the strict concurrency comparison.
-func TestClassifierParallelTimingRejectsBoundary(t *testing.T) {
-	// Arrange
-	batch, single := 240*time.Millisecond, 120*time.Millisecond
-	// Act
-	err := checkClassifierParallelTiming(batch, single)
-	// Assert
-	if err == nil {
-		t.Fatal("sequential timing passed")
-	}
-}
-
-// An absent single-call measurement cannot provide a valid concurrency baseline.
-func TestClassifierParallelTimingRejectsMissingBaseline(t *testing.T) {
-	// Arrange
-	batch, single := time.Duration(0), time.Duration(0)
-	// Act
-	err := checkClassifierParallelTiming(batch, single)
-	// Assert
-	if err == nil {
-		t.Fatal("missing baseline passed")
-	}
-}
-
-// The timeout assertion allows scheduling headroom beyond the learner's 200ms deadline.
-func TestClassifierDeadlineAcceptsHeadroom(t *testing.T) {
+// The timeout assertion allows scheduling headroom beyond the learner's 200ms per-call timeout.
+func TestClassifierTimeoutAcceptsHeadroom(t *testing.T) {
 	// Arrange
 	elapsed := 300 * time.Millisecond
 	// Act
-	err := checkClassifierDeadline(elapsed)
+	err := checkClassifierTimeout(elapsed)
 	// Assert
 	if err != nil {
 		t.Fatal(err)
@@ -155,11 +119,11 @@ func TestClassifierDeadlineAcceptsHeadroom(t *testing.T) {
 }
 
 // The timeout assertion rejects the 600ms outer boundary.
-func TestClassifierDeadlineRejectsBoundary(t *testing.T) {
+func TestClassifierTimeoutRejectsBoundary(t *testing.T) {
 	// Arrange
 	elapsed := 600 * time.Millisecond
 	// Act
-	err := checkClassifierDeadline(elapsed)
+	err := checkClassifierTimeout(elapsed)
 	// Assert
 	if err == nil {
 		t.Fatal("unbounded classifier wait passed")
@@ -174,10 +138,10 @@ func TestClassifierPolicyPreservesHeuristics(t *testing.T) {
 		t.Fatal(err)
 	}
 	expected["mode"] = "log"
-	expected["classifier"] = map[string]any{"threshold": float64(85), "failure_mode": "fail_closed"}
+	expected["classifier"] = map[string]any{"threshold": float64(85)}
 	// Act
 	var actual map[string]any
-	err := json.Unmarshal([]byte(classifierPolicyJSON("log", "fail_closed", 85)), &actual)
+	err := json.Unmarshal([]byte(classifierPolicyJSON("log", 85)), &actual)
 	// Assert
 	if err != nil || !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected preserved policy plus classifier settings, got %v, err=%v", actual, err)

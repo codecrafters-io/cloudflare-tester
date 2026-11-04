@@ -22,7 +22,6 @@ type classifierReply struct {
 	status int
 	delay  time.Duration
 	body   string
-	drip   bool
 }
 
 type classifierExpectation struct {
@@ -30,8 +29,7 @@ type classifierExpectation struct {
 	unavailable bool
 	above       bool
 	threshold   int
-	timing      string
-	deadline    bool
+	timeout     bool
 }
 
 type classifierRequest struct {
@@ -40,15 +38,14 @@ type classifierRequest struct {
 }
 
 type classifierFixture struct {
-	url           string
-	close         func()
-	lock          sync.Mutex
-	replies       map[string]classifierReply
-	requests      []classifierRequest
-	expected      []json.RawMessage
-	offset        int
-	singleLatency time.Duration
-	down          bool
+	url      string
+	close    func()
+	lock     sync.Mutex
+	replies  map[string]classifierReply
+	requests []classifierRequest
+	expected []json.RawMessage
+	offset   int
+	down     bool
 }
 
 func newClassifierFixture() *classifierFixture {
@@ -88,23 +85,7 @@ func newClassifierFixture() *classifierFixture {
 		if reply.status != 0 {
 			w.WriteHeader(reply.status)
 		}
-		if reply.drip {
-			io.WriteString(w, `{"score":`)
-			w.(http.Flusher).Flush()
-			// Bytes arrive faster than a socket timeout; the whole-call deadline must still expire.
-			for range 10 {
-				select {
-				case <-time.After(80 * time.Millisecond):
-				case <-r.Context().Done():
-					return
-				}
-				if _, err := io.WriteString(w, " "); err != nil {
-					return
-				}
-				w.(http.Flusher).Flush()
-			}
-			io.WriteString(w, "92}")
-		} else if reply.body != "" {
+		if reply.body != "" {
 			io.WriteString(w, reply.body)
 		} else {
 			fmt.Fprintf(w, `{"score":%d}`, reply.score)
@@ -212,7 +193,7 @@ func (fixture *classifierFixture) prepare(h *test_case_harness.TestCaseHarness, 
 		fixture.replies[key] = expected.replies[i]
 	}
 	fixture.lock.Unlock()
-	h.Logger.Infof("[%s] Synthetic classifier fixtures: one POST /classify per original message, timeout 200ms", testCase.name)
+	h.Logger.Infof("[%s] Synthetic classifier fixtures: one POST /classify per original message, per-call timeout 200ms", testCase.name)
 	for i, reply := range expected.replies {
 		body := reply.body
 		if body == "" {
@@ -222,7 +203,7 @@ func (fixture *classifierFixture) prepare(h *test_case_harness.TestCaseHarness, 
 		if status == 0 {
 			status = 200
 		}
-		h.Logger.Infof("[%s] Classifier message %d: HTTP %d, body=%+q, delay=%dms, drip=%t", testCase.name, i+1, status, body, reply.delay.Milliseconds(), reply.drip)
+		h.Logger.Infof("[%s] Classifier message %d: HTTP %d, body=%+q, delay=%dms", testCase.name, i+1, status, body, reply.delay.Milliseconds())
 	}
 	if fixture.down {
 		h.Logger.Infof("[%s] Classifier drops connections without an HTTP response to simulate a transport failure", testCase.name)
@@ -231,34 +212,18 @@ func (fixture *classifierFixture) prepare(h *test_case_harness.TestCaseHarness, 
 	return nil
 }
 
-func checkClassifierParallelTiming(batch, single time.Duration) error {
-	if single <= 0 || batch >= 2*single {
-		return fmt.Errorf("five-message classification must finish in under twice one-call time (batch_ms=%.1f single_ms=%.1f limit_ms=%.1f); start calls in parallel instead of waiting after each message", float64(batch)/float64(time.Millisecond), float64(single)/float64(time.Millisecond), float64(2*single)/float64(time.Millisecond))
-	}
-	return nil
-}
-
-func checkClassifierDeadline(elapsed time.Duration) error {
+func checkClassifierTimeout(elapsed time.Duration) error {
 	if elapsed >= 600*time.Millisecond {
-		return fmt.Errorf("classifier call exceeded timeout budget: elapsed_ms=%.1f limit_ms=600.0; enforce a 200ms whole-call deadline, including response body reads", float64(elapsed)/float64(time.Millisecond))
+		return fmt.Errorf("classifier call exceeded timeout budget: elapsed_ms=%.1f limit_ms=600.0; set a 200ms timeout on each classifier HTTP request", float64(elapsed)/float64(time.Millisecond))
 	}
 	return nil
 }
 
 func (fixture *classifierFixture) check(h *test_case_harness.TestCaseHarness, testCase policyCase, headers http.Header, elapsed time.Duration) error {
 	expected := *testCase.classifier
-	if expected.timing == "single" {
-		fixture.singleLatency = elapsed
-	}
-	if expected.timing == "batch" {
-		h.Logger.Infof("[%s] Classifier parallel timing: batch_ms=%.1f single_ms=%.1f limit_ms=%.1f", testCase.name, float64(elapsed)/float64(time.Millisecond), float64(fixture.singleLatency)/float64(time.Millisecond), float64(2*fixture.singleLatency)/float64(time.Millisecond))
-		if err := checkClassifierParallelTiming(elapsed, fixture.singleLatency); err != nil {
-			return err
-		}
-	}
-	if expected.deadline {
-		h.Logger.Infof("[%s] Classifier timeout timing: elapsed_ms=%.1f limit_ms=600.0 (200ms deadline plus scheduling headroom)", testCase.name, float64(elapsed)/float64(time.Millisecond))
-		if err := checkClassifierDeadline(elapsed); err != nil {
+	if expected.timeout {
+		h.Logger.Infof("[%s] Classifier timeout timing: elapsed_ms=%.1f limit_ms=600.0 (200ms per-call timeout plus scheduling headroom)", testCase.name, float64(elapsed)/float64(time.Millisecond))
+		if err := checkClassifierTimeout(elapsed); err != nil {
 			return err
 		}
 	}

@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/codecrafters-io/cloudflare-tester/internal"
+	"github.com/codecrafters-io/firewall-tester/internal"
 )
 
 func main() {

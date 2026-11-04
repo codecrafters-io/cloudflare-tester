@@ -188,7 +188,7 @@ func testThresholdScenario(t *testing.T, scenario string, exitCode int, allStage
 func TestDecisionPolicyPreservesEarlierSettings(t *testing.T) {
 	// Arrange
 	var expected map[string]any
-	if err := json.Unmarshal([]byte(classifierPolicyJSON("log", "fail_closed", 70)), &expected); err != nil {
+	if err := json.Unmarshal([]byte(classifierPolicyJSON("log", 70)), &expected); err != nil {
 		t.Fatal(err)
 	}
 	expected["decisions"] = map[string]any{
@@ -198,7 +198,7 @@ func TestDecisionPolicyPreservesEarlierSettings(t *testing.T) {
 	supplied := `{"default":{"classifier_high":96,"classifier_medium":75,"heuristic_medium":4},"tool":{"classifier_high":88,"classifier_medium":65,"heuristic_medium":3}}`
 	// Act
 	var actual map[string]any
-	err := json.Unmarshal([]byte(decisionPolicyJSON("log", "fail_closed", supplied)), &actual)
+	err := json.Unmarshal([]byte(decisionPolicyJSON("log", supplied)), &actual)
 	// Assert
 	if err != nil || !reflect.DeepEqual(actual, expected) {
 		t.Fatalf("unexpected decision policy %v, err=%v", actual, err)
@@ -208,7 +208,7 @@ func TestDecisionPolicyPreservesEarlierSettings(t *testing.T) {
 // Threshold output comparison hides allocated addresses while retaining decision evidence.
 func TestDecisionOutputNormalization(t *testing.T) {
 	// Arrange
-	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/cloudflare-stage-7-123/policy.json\"\nHTTP 403 combined_scores role=tool cutoff=40 timeout 200ms\n")
+	input := []byte("--origin http://127.0.0.1:45678 --detector http://127.0.0.1:45679 --policy \"/tmp/firewall-stage-7-123/policy.json\"\nHTTP 403 combined_scores role=tool cutoff=40 timeout 200ms\n")
 	expected := "--origin <mock-origin> --detector <mock-detector> --policy \"<temporary-directory>/policy.json\"\nHTTP 403 combined_scores role=tool cutoff=40 timeout 200ms\n"
 	// Act
 	actual := string(normalizeClassifierOutput(input))

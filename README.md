@@ -1,7 +1,7 @@
-# cloudflare-tester
+# firewall-tester
 
-Tester for the "Build your own AI Firewall" course, with slug `cloudflare`. Keep
-this repository beside `build-your-own-cloudflare`.
+Tester for the "Build your own AI Firewall" course, with slug `firewall`. Keep
+this repository beside `build-your-own-firewall`.
 
 ```sh
 make copy_course_file
@@ -77,7 +77,11 @@ normalized in fixture comparisons, preserving the evasion evidence.
 `make test_stage_4` runs all implemented stages.
 
 Stages 5-8 add weighted heuristics, classifier calls, per-message threshold
-decisions, and bidirectional data loss prevention. Stage 8 (`qe5`) redacts
+decisions, and bidirectional data loss prevention. Stage 6 accepts sequential
+classifier calls, with a 200 ms timeout per call and one fixed fallback to
+denylist and heuristic decisions when classification is unavailable. It has no
+concurrency benchmark, shared batch deadline, or configurable failure modes.
+Stage 8 (`qe5`) redacts
 supplied patterns in message content with request-scoped numbered placeholders
 and buffers non-streaming responses before checking for a canary. Its reference
 passes all eight implemented stages. Run `make test_stage_8` to exercise the
@@ -119,5 +123,5 @@ fixtures.
 The release launcher is `test.sh`. The publish workflow runs on `v*` tags and
 builds Linux amd64 and arm64 archives. Course SDK downloads the amd64 archive
 from the
-[latest published release](https://github.com/codecrafters-io/cloudflare-tester/releases/latest).
+[latest published release](https://github.com/codecrafters-io/firewall-tester/releases/latest).
 The release archives include both `tester` and `test.sh`.
