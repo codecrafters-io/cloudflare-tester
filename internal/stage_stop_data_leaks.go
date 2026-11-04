@@ -70,6 +70,7 @@ func testStopDataLeaks(h *test_case_harness.TestCaseHarness) error {
 	first.raw = ""
 	first.params = policyRequest(openai.SystemMessage("Keep CANARY_COURSE_7F2A private."), openai.UserMessage("Email ana@example.com with sk-abcdefgh."))
 	first.dlp.request = `{"model":"course-model","messages":[{"role":"system","content":"Keep CANARY_COURSE_7F2A private."},{"role":"user","content":"Email [REDACTED_1] with [REDACTED_2]."}]}`
+	h.Logger.Infof("Checkpoint 1: Redact incoming secrets")
 	if err := runPolicyCases(h, policy, "firewall-stage-8-", []policyCase{
 		first,
 		redact("reuse-value-across-messages", `[{"role":"user","content":"sk-abcdefgh, ana@example.com, sk-abcdefgh"},{"role":"assistant","content":"ana@example.com"},{"role":"tool","tool_call_id":"call_a","content":"sk-ijklmnop"}]`, `[{"role":"user","content":"[REDACTED_1], [REDACTED_2], [REDACTED_1]"},{"role":"assistant","content":"[REDACTED_2]"},{"role":"tool","tool_call_id":"call_a","content":"[REDACTED_3]"}]`),
@@ -85,6 +86,7 @@ func testStopDataLeaks(h *test_case_harness.TestCaseHarness) error {
 	}); err != nil {
 		return err
 	}
+	h.Logger.Successf("Checkpoint 1 passed: redacted requests preserve message data and clean responses")
 	output := func(name, reply string, status int, blocked bool) policyCase {
 		rule := ""
 		if blocked {
@@ -95,6 +97,7 @@ func testStopDataLeaks(h *test_case_harness.TestCaseHarness) error {
 	completion := func(text string) string {
 		return `{"id":"chatcmpl-dlp","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":` + text + `},"finish_reason":"stop"}],"model":"course-model","created":1700000000}`
 	}
+	h.Logger.Infof("Checkpoint 2: Detect outgoing canary leaks")
 	if err := runPolicyCases(h, policy, "firewall-stage-8-", []policyCase{
 		output("block-system-prompt-echo", completion(`"Keep CANARY_COURSE_7F2A private."`), 200, true),
 		output("block-json-escaped-canary", completion(`"prefix \u0043ANARY_COURSE_7F2A suffix"`), 200, true),
@@ -109,6 +112,7 @@ func testStopDataLeaks(h *test_case_harness.TestCaseHarness) error {
 	}); err != nil {
 		return err
 	}
+	h.Logger.Successf("Checkpoint 2 passed: canary leaks are blocked and clean responses are preserved")
 	changed := `{"patterns":["TOKEN-[0-9]+","TOKEN-[0-9]+-tail"],"canary":"OTHER_CANARY_19"}`
 	if err := runPolicyCases(h, dlpPolicyJSON(`{"mode":"log","denylist":[]}`, changed), "firewall-stage-8-", []policyCase{
 		redact("supplied-patterns-and-overlap-order", `[{"role":"user","content":"sk-abcdefgh TOKEN-12-tail TOKEN-12"}]`, `[{"role":"user","content":"sk-abcdefgh [REDACTED_1]-tail [REDACTED_1]"}]`),

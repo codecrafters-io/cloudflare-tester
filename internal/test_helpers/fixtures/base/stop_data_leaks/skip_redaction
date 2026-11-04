@@ -1,4 +1,5 @@
 [33m[tester::#QE5] [0m[94mRunning tests for Stage #QE5 (qe5)[0m
+[33m[tester::#QE5] [0m[94mCheckpoint 1: Redact incoming secrets[0m
 [33m[tester::#QE5] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
 [33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 1/2)[0m

@@ -72,7 +72,7 @@ test_stage_6: build
 	TESTER_DIR=$(shell pwd)/dist ./test.sh
 
 define stage_7_test_cases
-[{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Decide with thresholds"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
+[{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Combine detection signals"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
 endef
 
 test_stage_7: build
@@ -81,7 +81,7 @@ test_stage_7: build
 	TESTER_DIR=$(shell pwd)/dist ./test.sh
 
 define stage_8_test_cases
-[{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Stop data leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Decide with thresholds"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
+[{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Redact secrets and detect leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Combine detection signals"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
 endef
 
 test_stage_8: build
@@ -90,7 +90,7 @@ test_stage_8: build
 	TESTER_DIR=$(shell pwd)/dist ./test.sh
 
 define stage_9_test_cases
-[{"slug":"ou9","tester_log_prefix":"stage-9","title":"Stage #9: Inspect streams"},{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Stop data leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Decide with thresholds"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
+[{"slug":"ou9","tester_log_prefix":"stage-9","title":"Stage #9: Inspect streams"},{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Redact secrets and detect leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Combine detection signals"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
 endef
 
 test_stage_9: build
@@ -99,7 +99,7 @@ test_stage_9: build
 	TESTER_DIR=$(shell pwd)/dist ./test.sh
 
 define stage_10_test_cases
-[{"slug":"as4","tester_log_prefix":"stage-10","title":"Stage #10: Guard tool calls"},{"slug":"ou9","tester_log_prefix":"stage-9","title":"Stage #9: Inspect streams"},{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Stop data leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Decide with thresholds"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
+[{"slug":"as4","tester_log_prefix":"stage-10","title":"Stage #10: Guard tool calls"},{"slug":"ou9","tester_log_prefix":"stage-9","title":"Stage #9: Inspect streams"},{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Redact secrets and detect leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Combine detection signals"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
 endef
 
 test_stage_10: build
@@ -108,7 +108,7 @@ test_stage_10: build
 	TESTER_DIR=$(shell pwd)/dist ./test.sh
 
 define stage_11_test_cases
-[{"slug":"mu9","tester_log_prefix":"stage-11","title":"Stage #11: Stop the exfiltration"},{"slug":"as4","tester_log_prefix":"stage-10","title":"Stage #10: Guard tool calls"},{"slug":"ou9","tester_log_prefix":"stage-9","title":"Stage #9: Inspect streams"},{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Stop data leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Decide with thresholds"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
+[{"slug":"mu9","tester_log_prefix":"stage-11","title":"Stage #11: Stop the exfiltration"},{"slug":"as4","tester_log_prefix":"stage-10","title":"Stage #10: Guard tool calls"},{"slug":"ou9","tester_log_prefix":"stage-9","title":"Stage #9: Inspect streams"},{"slug":"qe5","tester_log_prefix":"stage-8","title":"Stage #8: Redact secrets and detect leaks"},{"slug":"si3","tester_log_prefix":"stage-7","title":"Stage #7: Combine detection signals"},{"slug":"xd5","tester_log_prefix":"stage-6","title":"Stage #6: Call the classifier"},{"slug":"ro3","tester_log_prefix":"stage-5","title":"Stage #5: Score with heuristics"},{"slug":"wt4","tester_log_prefix":"stage-4","title":"Stage #4: Defeat evasion"},{"slug":"kg7","tester_log_prefix":"stage-3","title":"Stage #3: Block and log"},{"slug":"tf0","tester_log_prefix":"stage-2","title":"Stage #2: Proxy the API"},{"slug":"fi6","tester_log_prefix":"stage-1","title":"Stage #1: Bind to a port"}]
 endef
 
 test_stage_11: build

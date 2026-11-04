@@ -77,12 +77,12 @@ stages:
   difficulty: medium
   marketing_md: In this stage, you'll score messages through a classifier service and apply a policy cutoff.
 - slug: si3
-  name: Decide with thresholds
+  name: Combine detection signals
   difficulty: medium
   marketing_md: In this stage, you'll combine classifier and heuristic scores using policy thresholds, with stricter
     rules for messages returned by tools.
 - slug: qe5
-  name: Stop data leaks
+  name: Redact secrets and detect leaks
   difficulty: medium
   marketing_md: In this stage, you'll redact secrets from incoming messages and block outgoing responses that contain
     a canary token from the system prompt.
@@ -93,7 +93,7 @@ stages:
     chunks never reaches the client.
 - slug: as4
   name: Guard tool calls
-  difficulty: medium
+  difficulty: hard
   marketing_md: In this stage, you'll enforce tool and destination allowlists by parsing complete tool arguments,
     including arguments received across stream chunks.
 - slug: mu9

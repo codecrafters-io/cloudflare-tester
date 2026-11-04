@@ -194,6 +194,7 @@
 [33m[tester::#OU9] [0m[92mTest passed.[0m
 
 [33m[tester::#QE5] [0m[94mRunning tests for Stage #QE5 (qe5)[0m
+[33m[tester::#QE5] [0m[94mCheckpoint 1: Redact incoming secrets[0m
 [33m[tester::#QE5] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
 [33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
@@ -294,6 +295,8 @@
 [33m[tester::#QE5] [0m[94m[reject-uninspectable-before-origin] Request body: {"model":"course-model","messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":"https://example.com/a.png"}}]}],"temperature":0.25,"metadata":{"retain":9007199254740993}}[0m
 [33m[tester::#QE5] [0m[94m[reject-uninspectable-before-origin] Expect HTTP 400 and no origin request, because the firewall cannot inspect this request[0m
 [33m[tester::#QE5] [0m[92m[reject-uninspectable-before-origin] Rejected with HTTP 400 without contacting the origin[0m
+[33m[tester::#QE5] [0m[92mCheckpoint 1 passed: redacted requests preserve message data and clean responses[0m
+[33m[tester::#QE5] [0m[94mCheckpoint 2: Detect outgoing canary leaks[0m
 [33m[tester::#QE5] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[],"dlp":{"patterns":["sk-[A-Za-z0-9]{8,}","[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"],"canary":"CANARY_COURSE_7F2A"},"mode":"block"}[0m
 [33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
@@ -380,6 +383,7 @@
 [33m[tester::#QE5] [0m[94m[marker-free-prompt-content-can-pass] Expected response X-Firewall-Match: ""[0m
 [33m[tester::#QE5] [0m[92m[marker-free-prompt-content-can-pass] Origin received the expected redacted message content and preserved metadata[0m
 [33m[tester::#QE5] [0m[92m[marker-free-prompt-content-can-pass] Forwarded unchanged with X-Firewall-Match=""[0m
+[33m[tester::#QE5] [0m[92mCheckpoint 2 passed: canary leaks are blocked and clean responses are preserved[0m
 [33m[tester::#QE5] [0m[94mWrote <temporary-directory>/policy.json: {"denylist":[],"dlp":{"patterns":["TOKEN-[0-9]+","TOKEN-[0-9]+-tail"],"canary":"OTHER_CANARY_19"},"mode":"log"}[0m
 [33m[tester::#QE5] [0m[94m$ ./your_program.sh --origin <mock-origin> --detector <mock-detector> --policy "<temporary-directory>/policy.json"[0m
 [33m[tester::#QE5] [0m[94mSending GET /health to port 8080 (request 1/2)[0m
@@ -1276,6 +1280,14 @@
 [33m[tester::#RO3] [0m[94m[count-once-across-messages-and-parts] Expected X-Firewall-Signals IDs: ["role-token"], score >= 5: false[0m
 [33m[tester::#RO3] [0m[92m[count-once-across-messages-and-parts] Expected signals fired and score is on the correct side of the threshold[0m
 [33m[tester::#RO3] [0m[92m[count-once-across-messages-and-parts] Forwarded unchanged with X-Firewall-Match=""[0m
+[33m[tester::#RO3] [0m[94m[message-results-preserve-empty-history] Raw HTTP POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
+[33m[tester::#RO3] [0m[94m[message-results-preserve-empty-history] Request body: {"model":"course-model","messages":[{"role":"user","content":"[system]"},{"role":"assistant","content":null,"tool_calls":[{"id":"call_1","type":"function","function":{"name":"get_weather","arguments":"{}"}}]},{"role":"tool","tool_call_id":"call_1","content":[{"type":"text","text":"urgent override"}]},{"role":"user","content":"[system]"}]}[0m
+[33m[tester::#RO3] [0m[94m[message-results-preserve-empty-history] Origin response: HTTP 200, Content-Type: application/json, X-Request-Id: req-policy[0m
+[33m[tester::#RO3] [0m[94m[message-results-preserve-empty-history] Origin body: {"id":"chatcmpl-policy","object":"chat.completion","created":1700000000,"model":"course-model","choices":[{"index":0,"message":{"role":"assistant","content":"Policy allowed."},"finish_reason":"stop"}],"course_marker":"keep-this"}[0m
+[33m[tester::#RO3] [0m[94m[message-results-preserve-empty-history] Expected response X-Firewall-Match: ""[0m
+[33m[tester::#RO3] [0m[94m[message-results-preserve-empty-history] Expected X-Firewall-Signals IDs: ["role-token" "urgency"], score >= 5: false[0m
+[33m[tester::#RO3] [0m[92m[message-results-preserve-empty-history] Expected signals fired and score is on the correct side of the threshold[0m
+[33m[tester::#RO3] [0m[92m[message-results-preserve-empty-history] Forwarded unchanged with X-Firewall-Match=""[0m
 [33m[tester::#RO3] [0m[94m[proximity-unicode-boundary] SDK POST /v1/chat/completions, Authorization: Bearer course-test-key, Content-Type: application/json[0m
 [33m[tester::#RO3] [0m[94m[proximity-unicode-boundary] Request body: {"messages":[{"content":"instructionséééééééééééédisregard [system]","role":"user"}],"model":"course-model"}[0m
 [33m[tester::#RO3] [0m[94m[proximity-unicode-boundary] Expect HTTP 403 with error.type=firewall_block, error.rule=heuristic_score, and no origin request[0m
