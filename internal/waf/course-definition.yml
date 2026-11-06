@@ -1,0 +1,83 @@
+slug: firewall
+name: Build your own Web Application Firewall
+short_name: WAF
+release_status: alpha
+description_md: Build an inbound HTTP firewall that protects a web application. Start with a working reverse proxy, then add attack rules, evasion handling, machine-learning scores, and resource limits. Finish by virtually patching a vulnerable endpoint while keeping legitimate requests working.
+short_description_md: Learn HTTP proxying, attack detection, machine-learning integration, and security policy
+completion_percentage: 5
+languages:
+- slug: go
+  release_status: alpha
+- slug: python
+  release_status: alpha
+marketing:
+  difficulty: hard
+  sample_extension_idea_title: Inspect streaming responses
+  sample_extension_idea_description: Extend response inspection to streams without releasing protected content.
+  frequently_asked_questions:
+  - question_markdown: What exactly will I build?
+    answer_markdown: 'You''ll build an inbound web application firewall: external client -> your WAF -> protected application server. Your program inspects HTTP requests before the application receives them and checks responses before returning them to the client.
+
+
+      Across eleven stages, you''ll add literal rules, normalized inputs, weighted attack signals, ML scores, route-specific decisions, bounded body inspection, per-client rate limits, response-leak prevention, and an endpoint-specific virtual patch. Each stage keeps the preceding behavior working.'
+  - question_markdown: Where does machine learning fit?
+    answer_markdown: 'A separate trusted detector scores HTTP inspection inputs. Your WAF calls it with a deadline, validates the result, combines its score with policy, and reports when detection is unavailable. A supplied small pretrained classifier lets you exercise real inference locally without an API key or model-training prerequisites.
+
+
+      The grader uses scripted detector replies to test protocol and policy boundaries reproducibly. The model''s separate held-out evaluation reports its actual errors on a small synthetic dataset. Neither result measures production WAF accuracy.'
+  - question_markdown: What is the final challenge?
+    answer_markdown: 'A lab export endpoint accepts a list of requested record fields. Its vulnerable implementation also accepts a private field. The request can look harmless to both detectors. You''ll apply a virtual patch that restricts permitted export fields before the request reaches the server. Public-field exports must still succeed.
+
+
+      The finale combines this patch with earlier request and response controls. The origin request counter proves that blocked input never reaches the application; response denials happen after the application has processed the request.'
+  - question_markdown: What do I need?
+    answer_markdown: 'Use Go or Python, with familiarity with HTTP, JSON, and Git. The tester supplies a local application, detector replies, policies, and dummy data. The optional lab application and ML detector use Python''s standard library. No paid service is needed.
+
+
+      This is a learning implementation with an explicit HTTP subset. It is not a production security guarantee. The lessons call out inspection limits, false positives, and the application''s continuing responsibility to validate and authorize requests.'
+  testimonials: []
+stages:
+- slug: fi6
+  name: Bind to a port
+  difficulty: very_easy
+  marketing_md: In this stage, you'll start an HTTP server that answers health checks on port `8080`.
+- slug: tf0
+  name: Proxy web requests
+  difficulty: easy
+  marketing_md: In this stage, you'll forward HTTP requests and responses between a client and the protected application.
+- slug: kg7
+  name: Block and log
+  difficulty: easy
+  marketing_md: In this stage, you'll block matching attack rules or report their matches in log mode.
+- slug: wt4
+  name: Normalize request inputs
+  difficulty: medium
+  marketing_md: In this stage, you'll inspect decoded, normalized request inputs without changing forwarded traffic.
+- slug: ro3
+  name: Score attack signals
+  difficulty: medium
+  marketing_md: In this stage, you'll combine weighted attack signals into one request score.
+- slug: xd5
+  name: Add ML detection
+  difficulty: medium
+  marketing_md: In this stage, you'll call an ML detector and enforce a policy cutoff on its score.
+- slug: si3
+  name: Tune detection decisions
+  difficulty: medium
+  marketing_md: In this stage, you'll combine rule and ML scores using thresholds for each application route.
+- slug: qe5
+  name: Inspect request bodies
+  difficulty: medium
+  marketing_md: In this stage, you'll inspect structured request bodies within a strict size limit.
+- slug: ou9
+  name: Rate limit clients
+  difficulty: medium
+  marketing_md: In this stage, you'll limit requests from each client within a fixed time window.
+- slug: as4
+  name: Prevent response leaks
+  difficulty: hard
+  marketing_md: In this stage, you'll withhold responses that expose a protected pattern or exceed the inspection limit.
+- slug: mu9
+  name: Virtually patch an endpoint
+  difficulty: hard
+  marketing_md: In this stage, you'll virtually patch an export endpoint by restricting the fields clients may request.

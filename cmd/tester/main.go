@@ -4,11 +4,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/codecrafters-io/firewall-tester/internal"
+	"github.com/codecrafters-io/firewall-tester/internal/waf"
 )
 
 func main() {
-	os.Exit(internal.RunCLI(envMap()))
+	os.Exit(waf.RunCLI(envMap()))
 }
 
 func envMap() map[string]string {
